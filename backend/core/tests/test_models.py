@@ -52,7 +52,8 @@ class ProductModelTest(TestCase):
             name='Test Farm',
             owner=self.user,
             location='Test Location',
-            size_hectares=10.5
+            size_hectares=10.5,
+            established_date=timezone.now().date()
         )
         
         self.product = Product.objects.create(
@@ -90,7 +91,8 @@ class TraceabilityRecordModelTest(TestCase):
             name='Test Farm',
             owner=self.user,
             location='Test Location',
-            size_hectares=10.5
+            size_hectares=10.5,
+            established_date=timezone.now().date()
         )
         
         self.product = Product.objects.create(
