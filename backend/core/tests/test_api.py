@@ -26,7 +26,8 @@ class FarmAPITest(TestCase):
             'size_hectares': 10.5,
             'description': 'A test farm',
             'is_certified_organic': True,
-            'certification_details': 'Organic certification #12345'
+            'certification_details': 'Organic certification #12345',
+            'established_date': timezone.now().date()
         }
         
         self.farm = Farm.objects.create(
@@ -47,7 +48,8 @@ class FarmAPITest(TestCase):
             'name': 'New Test Farm',
             'location': 'New Location',
             'size_hectares': 20.5,
-            'description': 'A new test farm'
+            'description': 'A new test farm',
+            'established_date': timezone.now().date()
         }
         
         response = self.client.post(
@@ -84,7 +86,8 @@ class ProductAPITest(TestCase):
             name='Test Farm',
             owner=self.user,
             location='Test Location',
-            size_hectares=10.5
+            size_hectares=10.5,
+            established_date=timezone.now().date()
         )
         
         self.product_data = {
@@ -151,7 +154,8 @@ class TraceabilityRecordAPITest(TestCase):
             name='Test Farm',
             owner=self.user,
             location='Test Location',
-            size_hectares=10.5
+            size_hectares=10.5,
+            established_date=timezone.now().date()
         )
         
         self.product = Product.objects.create(
