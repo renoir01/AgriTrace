@@ -41,6 +41,11 @@ jobs:
       run: |
         mkdir -p backend/logs
         
+    - name: Run migrations
+      run: |
+        cd backend
+        python manage.py migrate
+        
     - name: Test with pytest
       run: |
         cd backend
