@@ -49,7 +49,8 @@ class FarmAPITest(TestCase):
             'location': 'New Location',
             'size_hectares': 20.5,
             'description': 'A new test farm',
-            'established_date': timezone.now().date()
+            'established_date': timezone.now().date(),
+            'coordinates': '12.345,67.890'
         }
         
         response = self.client.post(
@@ -203,7 +204,8 @@ class TraceabilityRecordAPITest(TestCase):
             'timestamp': timezone.now().isoformat(),
             'notes': 'Test processing record',
             'temperature': 20.0,
-            'humidity': 50.0
+            'humidity': 50.0,
+            'handler': self.user.id
         }
         
         response = self.client.post(

@@ -43,7 +43,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.name} - {self.farm.name}"
+        return self.name
 
 
 class TraceabilityRecord(models.Model):
@@ -70,4 +70,4 @@ class TraceabilityRecord(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"{self.record_type} - {self.product.name} - {self.timestamp}"
+        return f"{self.record_type} record for {self.product.name}"
