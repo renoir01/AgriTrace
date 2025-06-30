@@ -101,4 +101,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Project Board
 
-[AgriTrace Project Board](https://github.com/renoir01/AgriTrace/projects/1)
+[AgriTrace Project Board](https://github.com/renoir01/AgriTrace/projects)
