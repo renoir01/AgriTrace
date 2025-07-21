@@ -1,0 +1,28 @@
+# Example Terraform Variables for AgriTrace
+# Copy this file to terraform.tfvars and customize the values
+
+# AWS Configuration
+aws_region = "us-east-1"
+environment = "dev"
+project_name = "agritrace"
+
+# Network Configuration
+vpc_cidr = "10.0.0.0/16"
+public_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.20.0/24"]
+
+# Database Configuration
+db_instance_class = "db.t3.micro"
+db_allocated_storage = 20
+db_name = "agritrace"
+db_username = "agritrace_admin"
+
+# Container Configuration
+container_cpu = 256
+container_memory = 512
+app_port = 8000
+health_check_path = "/api/v1/health/"
+
+# Optional: Domain and SSL Configuration
+# domain_name = "your-domain.com"
+# certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
