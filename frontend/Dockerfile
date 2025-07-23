@@ -25,10 +25,6 @@ FROM nginx:alpine
 # Install curl for health checks
 RUN apk add --no-cache curl
 
-# Create nginx user
-RUN addgroup -g 101 -S nginx
-RUN adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx
-
 # Copy built assets from build stage
 COPY --from=build /app/build /usr/share/nginx/html
 
