@@ -9,8 +9,8 @@ public_subnet_cidr = "10.0.1.0/24"
 private_subnet_cidr = "10.0.2.0/24"
 
 # Database Configuration
-db_sku_name = "B_Gen5_1"
-db_storage_mb = 20480
+db_sku_name = "B_Standard_B1ms"
+db_storage_mb = 32768
 db_backup_retention_days = 7
 db_geo_redundant_backup_enabled = false
 
