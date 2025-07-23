@@ -39,7 +39,7 @@ resource "azurerm_subnet" "database" {
   name                 = "${local.name_prefix}-db-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.0.3.0/24"]
+  address_prefixes     = ["10.0.4.0/24"]
   
   # Delegate subnet to PostgreSQL Flexible Server
   delegation {
