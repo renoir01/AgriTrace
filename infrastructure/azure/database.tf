@@ -1,36 +1,36 @@
 # Azure Database Infrastructure for AgriTrace
 
-# PostgreSQL Server
-resource "azurerm_postgresql_server" "main" {
-  name                = "${local.name_prefix}-psql-server"
+# PostgreSQL Flexible Server
+resource "azurerm_postgresql_flexible_server" "main" {
+  name                = "${var.project_name}-${var.environment}-psql-server"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
-  administrator_login          = var.db_username
-  administrator_login_password = random_password.db_password.result
+  administrator_login    = var.db_admin_username
+  administrator_password = random_password.db_password.result
 
-  sku_name   = var.db_sku_name
-  version    = "11"
-  storage_mb = var.db_storage_mb
-
-  backup_retention_days        = 7
-  geo_redundant_backup_enabled = false
+  sku_name                     = var.db_sku_name
+  version                      = "13"
+  storage_mb                   = var.db_storage_mb
+  backup_retention_days        = var.db_backup_retention_days
+  geo_redundant_backup_enabled = var.db_geo_redundant_backup_enabled
   auto_grow_enabled            = true
+  public_network_access_enabled = false
 
-  public_network_access_enabled    = false
-  ssl_enforcement_enabled          = true
-  ssl_minimal_tls_version_enforced = "TLS1_2"
+  delegated_subnet_id = azurerm_subnet.private.id
+  private_dns_zone_id = azurerm_private_dns_zone.postgresql.id
+
+  depends_on = [azurerm_private_dns_zone_virtual_network_link.postgresql]
 
   tags = local.common_tags
 }
 
 # PostgreSQL Database
-resource "azurerm_postgresql_database" "main" {
-  name                = var.db_name
-  resource_group_name = azurerm_resource_group.main.name
-  server_name         = azurerm_postgresql_server.main.name
-  charset             = "UTF8"
-  collation           = "English_United States.1252"
+resource "azurerm_postgresql_flexible_server_database" "main" {
+  name      = "agritrace"
+  server_id = azurerm_postgresql_flexible_server.main.id
+  charset   = "UTF8"
+  collation = "en_US.utf8"
 }
 
 # Private Endpoint for PostgreSQL
@@ -42,7 +42,7 @@ resource "azurerm_private_endpoint" "postgresql" {
 
   private_service_connection {
     name                           = "${local.name_prefix}-psql-psc"
-    private_connection_resource_id = azurerm_postgresql_server.main.id
+    private_connection_resource_id = azurerm_postgresql_flexible_server.main.id
     subresource_names              = ["postgresqlServer"]
     is_manual_connection           = false
   }
@@ -68,7 +68,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgresql" {
 
 # DNS A Record for Private Endpoint
 resource "azurerm_private_dns_a_record" "postgresql" {
-  name                = azurerm_postgresql_server.main.name
+  name                = azurerm_postgresql_flexible_server.main.name
   zone_name           = azurerm_private_dns_zone.postgresql.name
   resource_group_name = azurerm_resource_group.main.name
   ttl                 = 300
@@ -112,7 +112,7 @@ resource "azurerm_key_vault_secret" "db_password" {
 # Store database connection string in Key Vault
 resource "azurerm_key_vault_secret" "db_connection_string" {
   name  = "db-connection-string"
-  value = "postgresql://${var.db_username}:${random_password.db_password.result}@${azurerm_postgresql_server.main.fqdn}:5432/${var.db_name}?sslmode=require"
+  value = "postgresql://${var.db_admin_username}:${random_password.db_password.result}@${azurerm_postgresql_flexible_server.main.fqdn}:5432/agritrace?sslmode=require"
   key_vault_id = azurerm_key_vault.main.id
   tags         = local.common_tags
 }
