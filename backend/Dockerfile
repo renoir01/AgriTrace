@@ -32,8 +32,8 @@ COPY . .
 RUN chown -R django:django /app
 
 # Create directories for static and media files
-RUN mkdir -p /app/static /app/media \
-    && chown -R django:django /app/static /app/media
+RUN mkdir -p /app/static /app/media /app/logs \
+    && chown -R django:django /app/static /app/media /app/logs
 
 # Switch to non-root user
 USER django
