@@ -2,34 +2,43 @@
 
 ## Live Application URL
 
-**Production URL:** [Update with your Railway URL after deployment]
-**Backend API:** [Update with your Railway backend URL]
-**Deployment Platform:** Railway (railway.app)
-**Deployment Date:** July 21, 2025
+**Production URL:** [Update with your Azure Application Gateway URL after deployment]
+**Backend API:** [Update with your Azure backend URL]
+**Deployment Platform:** Microsoft Azure
+**Deployment Date:** July 23, 2025
+**Infrastructure:** Azure Container Instances, Application Gateway, PostgreSQL
 
 ## Infrastructure Screenshots
 
-### AWS Resources Provisioned
+### Azure Infrastructure Resources
 
-1. **VPC and Networking**
-   - Screenshot: [Add screenshot of VPC dashboard]
-   - Resources: VPC, Subnets, Internet Gateway, NAT Gateways, Route Tables
+1. **Azure Resource Group**
+   - Screenshot: [Add screenshot of Azure resource group overview]
+   - Resources: Virtual Network, Container Registry, Container Instances, PostgreSQL, Application Gateway
 
-2. **RDS Database**
-   - Screenshot: [Add screenshot of RDS dashboard]
-   - Instance: PostgreSQL 14, db.t3.micro
+2. **Azure Container Registry**
+   - Screenshot: [Add screenshot of ACR with pushed images]
+   - Images: agritrace-backend:latest, agritrace-frontend:latest
+   - Registry: [Your ACR login server]
 
-3. **ECR Container Registry**
-   - Screenshot: [Add screenshot of ECR repositories]
-   - Repositories: agritrace-dev-backend, agritrace-dev-frontend
+3. **Container Instances**
+   - Screenshot: [Add screenshot of running container instances]
+   - Backend: Django application with health checks
+   - Frontend: React application with nginx
 
-4. **ECS Cluster and Services**
-   - Screenshot: [Add screenshot of ECS cluster]
-   - Services: Backend and Frontend services running on Fargate
+4. **PostgreSQL Database**
+   - Screenshot: [Add screenshot of Azure PostgreSQL server]
+   - Managed PostgreSQL with private networking and SSL
 
-5. **Application Load Balancer**
-   - Screenshot: [Add screenshot of ALB dashboard]
-   - Load Balancer: Distributing traffic between frontend and backend
+5. **Application Gateway**
+   - Screenshot: [Add screenshot of Application Gateway dashboard]
+   - Load balancer with path-based routing
+   - Public IP: [Your Azure public IP]
+
+6. **Terraform Infrastructure Code**
+   - Screenshot: [Add screenshot of Terraform files in repository]
+   - Complete Azure infrastructure as code
+   - Professional organization with modules and best practices
 
 ## Peer Review
 

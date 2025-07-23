@@ -1,0 +1,20 @@
+{
+  "name": "agritrace-frontend",
+  "version": "1.0.0",
+  "description": "AgriTrace Frontend - Agricultural Supply Chain Traceability Platform",
+  "main": "build/index.html",
+  "scripts": {
+    "start": "serve -s build -l 8080",
+    "build": "react-scripts build",
+    "azure:start": "serve -s build -p $PORT"
+  },
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  },
+  "azure": {
+    "appServicePlan": "Free",
+    "runtime": "node|18-lts",
+    "startupCommand": "npm run azure:start"
+  }
+}
