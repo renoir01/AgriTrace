@@ -1,5 +1,5 @@
 # Azure Terraform Variables for AgriTrace Deployment
-azure_location = "West US 2"
+azure_location = "East US 2"
 environment = "dev"
 project_name = "agritrace"
 
