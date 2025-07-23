@@ -31,8 +31,8 @@ COPY --from=build /app/build /usr/share/nginx/html
 # Copy optimized nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf.default
+# Remove default nginx config if it exists
+RUN rm -f /etc/nginx/conf.d/default.conf.default
 
 # Set proper permissions
 RUN chown -R nginx:nginx /usr/share/nginx/html && chmod -R 755 /usr/share/nginx/html
