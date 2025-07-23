@@ -73,9 +73,27 @@ variable "container_memory" {
 }
 
 variable "app_port" {
-  description = "Port exposed by the application"
+  description = "Port for the application"
   type        = number
   default     = 8000
+}
+
+variable "frontend_port" {
+  description = "Port for the frontend application"
+  type        = number
+  default     = 3000
+}
+
+variable "db_backup_retention_days" {
+  description = "Number of days to retain database backups"
+  type        = number
+  default     = 7
+}
+
+variable "db_geo_redundant_backup_enabled" {
+  description = "Enable geo-redundant backup for database"
+  type        = bool
+  default     = false
 }
 
 variable "domain_name" {
