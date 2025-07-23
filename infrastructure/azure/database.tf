@@ -17,7 +17,7 @@ resource "azurerm_postgresql_flexible_server" "main" {
   auto_grow_enabled            = true
   public_network_access_enabled = false
 
-  delegated_subnet_id = azurerm_subnet.private.id
+  delegated_subnet_id = azurerm_subnet.database.id
   private_dns_zone_id = azurerm_private_dns_zone.postgresql.id
 
   depends_on = [azurerm_private_dns_zone_virtual_network_link.postgresql]
@@ -38,7 +38,7 @@ resource "azurerm_private_endpoint" "postgresql" {
   name                = "${local.name_prefix}-psql-pe"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  subnet_id           = azurerm_subnet.private.id
+  subnet_id           = azurerm_subnet.database.id
 
   private_service_connection {
     name                           = "${local.name_prefix}-psql-psc"

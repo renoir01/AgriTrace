@@ -17,7 +17,7 @@ resource "azurerm_subnet" "public" {
   address_prefixes     = [var.public_subnet_cidr]
 }
 
-# Private Subnet
+# Private Subnet for Containers
 resource "azurerm_subnet" "private" {
   name                 = "${local.name_prefix}-private-subnet"
   resource_group_name  = azurerm_resource_group.main.name
@@ -30,6 +30,23 @@ resource "azurerm_subnet" "private" {
     service_delegation {
       name    = "Microsoft.ContainerInstance/containerGroups"
       actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
+}
+
+# Database Subnet for PostgreSQL Flexible Server
+resource "azurerm_subnet" "database" {
+  name                 = "${local.name_prefix}-db-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.3.0/24"]
+  
+  # Delegate subnet to PostgreSQL Flexible Server
+  delegation {
+    name = "postgresql-delegation"
+    service_delegation {
+      name    = "Microsoft.DBforPostgreSQL/flexibleServers"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
     }
   }
 }
