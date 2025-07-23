@@ -23,10 +23,10 @@ resource "azurerm_container_group" "backend" {
 
     environment_variables = {
       DJANGO_SETTINGS_MODULE = "agritrace_project.settings.production"
-      DB_HOST               = azurerm_postgresql_server.main.fqdn
+      DB_HOST               = azurerm_postgresql_flexible_server.main.fqdn
       DB_PORT               = "5432"
-      DB_NAME               = var.db_name
-      DB_USER               = var.db_username
+      DB_NAME               = "agritrace"
+      DB_USER               = var.db_admin_username
       ALLOWED_HOSTS         = azurerm_public_ip.app_gateway.ip_address
     }
 

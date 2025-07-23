@@ -22,12 +22,12 @@ output "private_subnet_id" {
 
 output "database_server_name" {
   description = "Name of the PostgreSQL server"
-  value       = azurerm_postgresql_server.main.name
+  value       = azurerm_postgresql_flexible_server.main.name
 }
 
 output "database_fqdn" {
   description = "FQDN of the PostgreSQL server"
-  value       = azurerm_postgresql_server.main.fqdn
+  value       = azurerm_postgresql_flexible_server.main.fqdn
   sensitive   = true
 }
 

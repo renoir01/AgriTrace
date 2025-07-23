@@ -54,7 +54,7 @@ variable "db_name" {
   default     = "agritrace"
 }
 
-variable "db_username" {
+variable "db_admin_username" {
   description = "Database administrator username"
   type        = string
   default     = "agritrace_admin"
