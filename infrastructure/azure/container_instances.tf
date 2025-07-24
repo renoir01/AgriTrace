@@ -27,7 +27,9 @@ resource "azurerm_container_group" "backend" {
       DB_PORT               = "5432"
       DB_NAME               = "agritrace"
       DB_USER               = var.db_admin_username
-      ALLOWED_HOSTS         = azurerm_public_ip.app_gateway.ip_address
+      ALLOWED_HOSTS         = "${azurerm_public_ip.app_gateway.ip_address},localhost,127.0.0.1"
+      DEBUG                 = "False"
+      PORT                  = tostring(var.app_port)
     }
 
     secure_environment_variables = {
@@ -35,30 +37,36 @@ resource "azurerm_container_group" "backend" {
       SECRET_KEY  = random_password.django_secret.result
     }
 
-    # Temporarily disabled health checks to allow containers to start
-    # liveness_probe {
-    #   http_get {
-    #     path   = "/api/v1/health/"
-    #     port   = var.app_port
-    #     scheme = "Http"
-    #   }
-    #   initial_delay_seconds = 30
-    #   period_seconds        = 30
-    #   timeout_seconds       = 10
-    #   failure_threshold     = 3
-    # }
+    # Add startup command to run Django server
+    commands = [
+      "/bin/sh",
+      "-c",
+      "python manage.py migrate && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:${var.app_port}"
+    ]
 
-    # readiness_probe {
-    #   http_get {
-    #     path   = "/api/v1/health/"
-    #     port   = var.app_port
-    #     scheme = "Http"
-    #   }
-    #   initial_delay_seconds = 10
-    #   period_seconds        = 10
-    #   timeout_seconds       = 5
-    #   failure_threshold     = 3
-    # }
+    liveness_probe {
+      http_get {
+        path   = "/api/v1/health/"
+        port   = var.app_port
+        scheme = "Http"
+      }
+      initial_delay_seconds = 60
+      period_seconds        = 30
+      timeout_seconds       = 10
+      failure_threshold     = 3
+    }
+
+    readiness_probe {
+      http_get {
+        path   = "/api/v1/health/"
+        port   = var.app_port
+        scheme = "Http"
+      }
+      initial_delay_seconds = 30
+      period_seconds        = 10
+      timeout_seconds       = 5
+      failure_threshold     = 3
+    }
   }
 
   image_registry_credential {
@@ -92,33 +100,40 @@ resource "azurerm_container_group" "frontend" {
     }
 
     environment_variables = {
-      REACT_APP_API_URL = "https://${azurerm_public_ip.app_gateway.ip_address}/api"
+      REACT_APP_API_URL = "http://${azurerm_public_ip.app_gateway.ip_address}/api"
+      PORT              = "80"
     }
 
-    # Temporarily disabled health checks to allow containers to start
-    # liveness_probe {
-    #   http_get {
-    #     path   = "/health"
-    #     port   = 80
-    #     scheme = "Http"
-    #   }
-    #   initial_delay_seconds = 30
-    #   period_seconds        = 30
-    #   timeout_seconds       = 10
-    #   failure_threshold     = 3
-    # }
+    # Add startup command to serve React app
+    commands = [
+      "/bin/sh",
+      "-c",
+      "npm start"
+    ]
 
-    # readiness_probe {
-    #   http_get {
-    #     path   = "/health"
-    #     port   = 80
-    #     scheme = "Http"
-    #   }
-    #   initial_delay_seconds = 10
-    #   period_seconds        = 10
-    #   timeout_seconds       = 5
-    #   failure_threshold     = 3
-    # }
+    liveness_probe {
+      http_get {
+        path   = "/"
+        port   = 80
+        scheme = "Http"
+      }
+      initial_delay_seconds = 60
+      period_seconds        = 30
+      timeout_seconds       = 10
+      failure_threshold     = 3
+    }
+
+    readiness_probe {
+      http_get {
+        path   = "/"
+        port   = 80
+        scheme = "Http"
+      }
+      initial_delay_seconds = 30
+      period_seconds        = 10
+      timeout_seconds       = 5
+      failure_threshold     = 3
+    }
   }
 
   image_registry_credential {
