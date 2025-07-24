@@ -83,3 +83,29 @@ jobs:
       run: |
         cd frontend
         CI=true npm test -- --passWithNoTests
+
+          docker-build-push:
+    runs-on: ubuntu-latest
+    needs: frontend-tests   # ensures frontend tests pass before building the image
+    env:
+      REGISTRY: agritracedevacr.azurecr.io
+      IMAGE_NAME: agritrace-frontend
+      ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+      ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Login to Azure Container Registry
+        run: |
+          echo $ACR_PASSWORD | docker login $REGISTRY -u $ACR_USERNAME --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t $REGISTRY/$IMAGE_NAME:latest ./frontend
+
+      - name: Push Docker image
+        run: |
+          docker push $REGISTRY/$IMAGE_NAME:latest
+
