@@ -16,6 +16,7 @@ resource "azurerm_postgresql_flexible_server" "main" {
   geo_redundant_backup_enabled = var.db_geo_redundant_backup_enabled
   auto_grow_enabled            = true
   public_network_access_enabled = false
+  zone                         = null
 
   delegated_subnet_id = azurerm_subnet.database.id
   private_dns_zone_id = azurerm_private_dns_zone.postgresql.id
