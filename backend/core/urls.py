@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from .views import UserViewSet, FarmViewSet, ProductViewSet, TraceabilityRecordViewSet
+from .views import UserViewSet, FarmViewSet, ProductViewSet, TraceabilityRecordViewSet, health_check
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
@@ -19,4 +19,6 @@ urlpatterns = [
     # JWT Authentication endpoints
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # Health check endpoint
+    path('health/', health_check, name='health_check'),
 ]

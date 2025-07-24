@@ -1,10 +1,17 @@
-from rest_framework import viewsets, permissions, filters, status
-from rest_framework.decorators import action
+from rest_framework import viewsets, permissions, status, filters
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 from .models import Farm, Product, TraceabilityRecord
 from .serializers import UserSerializer, FarmSerializer, ProductSerializer, TraceabilityRecordSerializer
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def health_check(request):
+    """Simple health check view function for container health checks"""
+    return JsonResponse({'status': 'OK'})
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
