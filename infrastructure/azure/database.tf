@@ -37,22 +37,8 @@ resource "azurerm_postgresql_flexible_server_database" "main" {
   collation = "en_US.utf8"
 }
 
-# Private Endpoint for PostgreSQL
-resource "azurerm_private_endpoint" "postgresql" {
-  name                = "${local.name_prefix}-psql-pe"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  subnet_id           = azurerm_subnet.database.id
-
-  private_service_connection {
-    name                           = "${local.name_prefix}-psql-psc"
-    private_connection_resource_id = azurerm_postgresql_flexible_server.main.id
-    subresource_names              = ["postgresqlServer"]
-    is_manual_connection           = false
-  }
-
-  tags = local.common_tags
-}
+# Private Endpoint for PostgreSQL - Removed due to server not supporting private endpoints
+# The PostgreSQL flexible server is already secured by being deployed in a delegated subnet
 
 # Private DNS Zone for PostgreSQL
 resource "azurerm_private_dns_zone" "postgresql" {
