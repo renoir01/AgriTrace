@@ -93,7 +93,7 @@ function MainLayout() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Agricultural Supply Chain Traceability
+            AgriTrace - Agricultural Supply Chain Traceability
           </Typography>
           
           <Box sx={{ display: 'flex', alignItems: 'center' }}>

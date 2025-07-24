@@ -1,6 +1,7 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from .models import Farm, Product, TraceabilityRecord
 from .serializers import UserSerializer, FarmSerializer, ProductSerializer, TraceabilityRecordSerializer
@@ -11,6 +12,21 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    @action(detail=False, methods=['get'], url_path='me')
+    def me(self, request):
+        """Get current user's data"""
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny], url_path='register')
+    def register(self, request):
+        """Register a new user"""
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FarmViewSet(viewsets.ModelViewSet):
