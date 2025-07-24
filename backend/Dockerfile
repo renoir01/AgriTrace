@@ -13,6 +13,7 @@ RUN apt-get update \
         build-essential \
         libpq-dev \
         curl \
+        netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
@@ -35,11 +36,12 @@ RUN chown -R django:django /app
 RUN mkdir -p /app/static /app/media /app/logs \
     && chown -R django:django /app/static /app/media /app/logs
 
+# Create entrypoint script
+COPY --chown=django:django entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Switch to non-root user
 USER django
-
-# Collect static files
-RUN python manage.py collectstatic --noinput --clear
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
@@ -48,5 +50,6 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Run gunicorn with optimized settings
+# Use entrypoint script
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--worker-class", "gevent", "--worker-connections", "1000", "--max-requests", "1000", "--max-requests-jitter", "100", "--timeout", "30", "--keep-alive", "2", "agritrace_project.wsgi:application"]
