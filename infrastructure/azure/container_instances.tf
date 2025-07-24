@@ -27,7 +27,7 @@ resource "azurerm_container_group" "backend" {
       DB_PORT               = "5432"
       DB_NAME               = "agritrace"
       DB_USER               = var.db_admin_username
-      ALLOWED_HOSTS         = "${azurerm_public_ip.app_gateway.ip_address},localhost,127.0.0.1"
+      ALLOWED_HOSTS         = "${azurerm_public_ip.app_gateway.ip_address},localhost,127.0.0.1,169.254.128.5,10.0.0.0/8,*"
       DEBUG                 = "False"
       PORT                  = tostring(var.app_port)
     }
@@ -108,7 +108,7 @@ resource "azurerm_container_group" "frontend" {
     commands = [
       "/bin/sh",
       "-c",
-      "npm start"
+      "npm run build && npm install -g serve && serve -s build -l 80"
     ]
 
     liveness_probe {
