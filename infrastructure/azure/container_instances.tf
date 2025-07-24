@@ -22,7 +22,7 @@ resource "azurerm_container_group" "backend" {
     }
 
     environment_variables = {
-      DJANGO_SETTINGS_MODULE = "agritrace_project.settings.production"
+      DJANGO_SETTINGS_MODULE = "agritrace_project.settings"
       DB_HOST               = azurerm_postgresql_flexible_server.main.fqdn
       DB_PORT               = "5432"
       DB_NAME               = "agritrace"
