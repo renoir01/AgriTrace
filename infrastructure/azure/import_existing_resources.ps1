@@ -55,6 +55,21 @@ terraform import azurerm_key_vault_secret.db_password "https://agritrace-dev-kv.
 Write-Host "Importing Private DNS Zone Virtual Network Link..." -ForegroundColor Yellow
 terraform import azurerm_private_dns_zone_virtual_network_link.postgresql "/subscriptions/ef573996-fc64-430c-88d1-a5da1fc15677/resourceGroups/agritrace-dev-rg/providers/Microsoft.Network/privateDnsZones/privatelink.postgres.database.azure.com/virtualNetworkLinks/agritrace-dev-psql-dns-link"
 
+# Container Group
+Write-Host "Importing Frontend Container Group..." -ForegroundColor Yellow
+terraform import azurerm_container_group.frontend "/subscriptions/ef573996-fc64-430c-88d1-a5da1fc15677/resourceGroups/agritrace-dev-rg/providers/Microsoft.ContainerInstance/containerGroups/agritrace-dev-frontend-ci"
+
+# PostgreSQL Flexible Server
+Write-Host "Importing PostgreSQL Flexible Server..." -ForegroundColor Yellow
+terraform import azurerm_postgresql_flexible_server.main "/subscriptions/ef573996-fc64-430c-88d1-a5da1fc15677/resourceGroups/agritrace-dev-rg/providers/Microsoft.DBforPostgreSQL/flexibleServers/agritrace-dev-psql-server"
+
+# Subnet Network Security Group Associations
+Write-Host "Importing Public Subnet NSG Association..." -ForegroundColor Yellow
+terraform import azurerm_subnet_network_security_group_association.public "/subscriptions/ef573996-fc64-430c-88d1-a5da1fc15677/resourceGroups/agritrace-dev-rg/providers/Microsoft.Network/virtualNetworks/agritrace-dev-vnet/subnets/agritrace-dev-public-subnet"
+
+Write-Host "Importing Private Subnet NSG Association..." -ForegroundColor Yellow
+terraform import azurerm_subnet_network_security_group_association.private "/subscriptions/ef573996-fc64-430c-88d1-a5da1fc15677/resourceGroups/agritrace-dev-rg/providers/Microsoft.Network/virtualNetworks/agritrace-dev-vnet/subnets/agritrace-dev-private-subnet"
+
 Write-Host "Import completed! Verifying imported resources..." -ForegroundColor Green
 terraform state list
 
