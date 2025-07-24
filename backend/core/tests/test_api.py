@@ -59,6 +59,10 @@ class FarmAPITest(TestCase):
             format='json'
         )
         
+        if response.status_code != status.HTTP_201_CREATED:
+            print(f"Response status: {response.status_code}")
+            print(f"Response data: {response.data}")
+        
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Farm.objects.count(), 2)
         self.assertEqual(Farm.objects.get(name='New Test Farm').owner, self.user)
@@ -122,7 +126,7 @@ class ProductAPITest(TestCase):
     def test_create_product(self):
         new_product_data = {
             'name': 'New Test Product',
-            'product_type': 'Fruit',
+            'product_type': 'CROP',
             'farm': self.farm.id,
             'description': 'A new test product',
             'harvest_date': timezone.now().date().isoformat(),
@@ -135,6 +139,10 @@ class ProductAPITest(TestCase):
             new_product_data,
             format='json'
         )
+        
+        if response.status_code != status.HTTP_201_CREATED:
+            print(f"Product Response status: {response.status_code}")
+            print(f"Product Response data: {response.data}")
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Product.objects.count(), 2)
@@ -199,7 +207,7 @@ class TraceabilityRecordAPITest(TestCase):
     def test_create_record(self):
         new_record_data = {
             'product': self.product.id,
-            'record_type': 'Processing',
+            'record_type': 'PROCESSING',
             'location': 'Processing Facility',
             'timestamp': timezone.now().isoformat(),
             'notes': 'Test processing record',
@@ -214,9 +222,13 @@ class TraceabilityRecordAPITest(TestCase):
             format='json'
         )
         
+        if response.status_code != status.HTTP_201_CREATED:
+            print(f"Traceability Response status: {response.status_code}")
+            print(f"Traceability Response data: {response.data}")
+        
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(TraceabilityRecord.objects.count(), 2)
         self.assertEqual(
-            TraceabilityRecord.objects.get(record_type='Processing').handler, 
+            TraceabilityRecord.objects.get(record_type='PROCESSING').handler,
             self.user
         )

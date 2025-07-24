@@ -121,7 +121,7 @@ class ProductAPITest(TestCase):
     def test_create_product(self):
         new_product_data = {
             'name': 'New Test Product',
-            'product_type': 'Fruit',
+            'product_type': 'CROP',
             'farm': self.farm.id,
             'description': 'A new test product',
             'harvest_date': timezone.now().date().isoformat(),
@@ -198,7 +198,7 @@ class TraceabilityRecordAPITest(TestCase):
     def test_create_record(self):
         new_record_data = {
             'product': self.product.id,
-            'record_type': 'Processing',
+            'record_type': 'PROCESSING',
             'location': 'Processing Facility',
             'timestamp': timezone.now().isoformat(),
             'notes': 'Test processing record',
@@ -215,6 +215,6 @@ class TraceabilityRecordAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(TraceabilityRecord.objects.count(), 2)
         self.assertEqual(
-            TraceabilityRecord.objects.get(record_type='Processing').handler, 
+            TraceabilityRecord.objects.get(record_type='PROCESSING').handler, 
             self.user
         )

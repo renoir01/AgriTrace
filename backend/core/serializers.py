@@ -20,6 +20,7 @@ class FarmSerializer(serializers.ModelSerializer):
             'is_certified_organic', 'certification_details',
             'created_at', 'updated_at'
         ]
+        read_only_fields = ['owner']
     
     def get_owner_name(self, obj):
         return f"{obj.owner.first_name} {obj.owner.last_name}" if obj.owner.first_name else obj.owner.username
