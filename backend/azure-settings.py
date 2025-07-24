@@ -1,4 +1,3 @@
-# Azure App Service specific Django settings
 import os
 from decouple import config
 import dj_database_url
@@ -19,24 +18,35 @@ if WEBSITE_HOSTNAME:
         DATABASES = {
             'default': dj_database_url.parse(os.environ['DATABASE_URL'])
         }
-    
+    else:
+        # Optional fallback if DATABASE_URL is not set
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': config('DB_NAME', default='agritrace_db'),
+                'USER': config('DB_USER', default='postgres'),
+                'PASSWORD': config('DB_PASSWORD', default='password'),
+                'HOST': config('DB_HOST', default='localhost'),
+                'PORT': config('DB_PORT', default='5432'),
+            }
+        }
+
     # Static files configuration
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    
+
     # Media files configuration
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-    
-    # CORS settings for Azure
+
+    # CORS settings for Azure App Service
     CORS_ALLOWED_ORIGINS = [
         f"https://{WEBSITE_HOSTNAME}",
+        # Uncomment and add your frontend domain when deployed
+        # "https://your-frontend-app.azurewebsites.net",
     ]
-    
-    # Add your frontend domain when deployed (uncomment and update if needed)
-    # CORS_ALLOWED_ORIGINS.append("https://your-frontend-app.azurewebsites.net")
-    
+
     # Security settings
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -45,7 +55,7 @@ else:
     # Local development settings
     DEBUG = True
     ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-    
+
     # Local database configuration
     DATABASES = {
         'default': {
