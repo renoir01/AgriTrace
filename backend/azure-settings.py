@@ -3,8 +3,12 @@ import os
 from decouple import config
 import dj_database_url
 
+# Define BASE_DIR as the root of your Django project
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # Azure App Service environment detection
 WEBSITE_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME')
+
 if WEBSITE_HOSTNAME:
     # Running on Azure App Service
     ALLOWED_HOSTS = [WEBSITE_HOSTNAME, '127.0.0.1', 'localhost']
@@ -30,19 +34,19 @@ if WEBSITE_HOSTNAME:
         f"https://{WEBSITE_HOSTNAME}",
     ]
     
-    # Add your frontend domain when deployed
+    # Add your frontend domain when deployed (uncomment and update if needed)
     # CORS_ALLOWED_ORIGINS.append("https://your-frontend-app.azurewebsites.net")
     
     # Security settings
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    
+
 else:
     # Local development settings
     DEBUG = True
     ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
     
-    # Local database
+    # Local database configuration
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
