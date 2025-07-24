@@ -16,6 +16,10 @@ terraform import azurerm_postgresql_flexible_server_database.main "/subscription
 Write-Host "Importing DB Connection String Secret..." -ForegroundColor Yellow
 terraform import azurerm_key_vault_secret.db_connection_string "https://agritrace-dev-kv.vault.azure.net/secrets/db-connection-string/a42803e4dbca4b0f8c7e68c34f89d862"
 
+# Application Gateway
+Write-Host "Importing Application Gateway..." -ForegroundColor Yellow
+terraform import azurerm_application_gateway.main "/subscriptions/ef573996-fc64-430c-88d1-a5da1fc15677/resourceGroups/agritrace-dev-rg/providers/Microsoft.Network/applicationGateways/agritrace-dev-appgw"
+
 Write-Host "Import completed! Verifying imported resources..." -ForegroundColor Green
 terraform state list
 
