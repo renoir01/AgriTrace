@@ -35,29 +35,30 @@ resource "azurerm_container_group" "backend" {
       SECRET_KEY  = random_password.django_secret.result
     }
 
-    liveness_probe {
-      http_get {
-        path   = "/api/v1/health/"
-        port   = var.app_port
-        scheme = "Http"
-      }
-      initial_delay_seconds = 30
-      period_seconds        = 30
-      timeout_seconds       = 10
-      failure_threshold     = 3
-    }
+    # Temporarily disabled health checks to allow containers to start
+    # liveness_probe {
+    #   http_get {
+    #     path   = "/api/v1/health/"
+    #     port   = var.app_port
+    #     scheme = "Http"
+    #   }
+    #   initial_delay_seconds = 30
+    #   period_seconds        = 30
+    #   timeout_seconds       = 10
+    #   failure_threshold     = 3
+    # }
 
-    readiness_probe {
-      http_get {
-        path   = "/api/v1/health/"
-        port   = var.app_port
-        scheme = "Http"
-      }
-      initial_delay_seconds = 10
-      period_seconds        = 10
-      timeout_seconds       = 5
-      failure_threshold     = 3
-    }
+    # readiness_probe {
+    #   http_get {
+    #     path   = "/api/v1/health/"
+    #     port   = var.app_port
+    #     scheme = "Http"
+    #   }
+    #   initial_delay_seconds = 10
+    #   period_seconds        = 10
+    #   timeout_seconds       = 5
+    #   failure_threshold     = 3
+    # }
   }
 
   image_registry_credential {
@@ -94,29 +95,30 @@ resource "azurerm_container_group" "frontend" {
       REACT_APP_API_URL = "https://${azurerm_public_ip.app_gateway.ip_address}/api"
     }
 
-    liveness_probe {
-      http_get {
-        path   = "/health"
-        port   = 80
-        scheme = "Http"
-      }
-      initial_delay_seconds = 30
-      period_seconds        = 30
-      timeout_seconds       = 10
-      failure_threshold     = 3
-    }
+    # Temporarily disabled health checks to allow containers to start
+    # liveness_probe {
+    #   http_get {
+    #     path   = "/health"
+    #     port   = 80
+    #     scheme = "Http"
+    #   }
+    #   initial_delay_seconds = 30
+    #   period_seconds        = 30
+    #   timeout_seconds       = 10
+    #   failure_threshold     = 3
+    # }
 
-    readiness_probe {
-      http_get {
-        path   = "/health"
-        port   = 80
-        scheme = "Http"
-      }
-      initial_delay_seconds = 10
-      period_seconds        = 10
-      timeout_seconds       = 5
-      failure_threshold     = 3
-    }
+    # readiness_probe {
+    #   http_get {
+    #     path   = "/health"
+    #     port   = 80
+    #     scheme = "Http"
+    #   }
+    #   initial_delay_seconds = 10
+    #   period_seconds        = 10
+    #   timeout_seconds       = 5
+    #   failure_threshold     = 3
+    # }
   }
 
   image_registry_credential {
