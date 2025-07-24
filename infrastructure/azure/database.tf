@@ -56,15 +56,8 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgresql" {
   tags                  = local.common_tags
 }
 
-# DNS A Record for Private Endpoint
-resource "azurerm_private_dns_a_record" "postgresql" {
-  name                = azurerm_postgresql_flexible_server.main.name
-  zone_name           = azurerm_private_dns_zone.postgresql.name
-  resource_group_name = azurerm_resource_group.main.name
-  ttl                 = 300
-  records             = [azurerm_private_endpoint.postgresql.private_service_connection.0.private_ip_address]
-  tags                = local.common_tags
-}
+# Private DNS A Record for PostgreSQL - Removed due to private endpoint not being supported
+# PostgreSQL server uses delegated subnet for private access
 
 # Key Vault for storing secrets
 resource "azurerm_key_vault" "main" {
