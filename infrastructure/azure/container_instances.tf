@@ -108,7 +108,7 @@ resource "azurerm_container_group" "frontend" {
     commands = [
       "/bin/sh",
       "-c",
-      "npm install -g serve && if [ -d 'build' ]; then serve -s build -p 80; else npm run build && serve -s build -p 80; fi"
+      "if [ -d 'build' ]; then cd build && python3 -m http.server 80; else echo 'No build directory found' && sleep 3600; fi"
     ]
 
     liveness_probe {
