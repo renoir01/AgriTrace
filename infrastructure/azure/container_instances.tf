@@ -108,7 +108,7 @@ resource "azurerm_container_group" "frontend" {
     commands = [
       "/bin/sh",
       "-c",
-      "if [ -d 'build' ]; then npx serve -s build -l 80; else npm run build && npx serve -s build -l 80; fi"
+      "npm install -g serve && if [ -d 'build' ]; then serve -s build -p 80; else npm run build && serve -s build -p 80; fi"
     ]
 
     liveness_probe {
