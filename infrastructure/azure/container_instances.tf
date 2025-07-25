@@ -90,7 +90,7 @@ resource "azurerm_container_group" "frontend" {
 
   container {
     name   = "frontend"
-    image  = "${azurerm_container_registry.main.login_server}/agritrace-frontend:latest"
+    image  = "nginx:alpine"
     cpu    = var.container_cpu
     memory = var.container_memory
 
@@ -104,11 +104,10 @@ resource "azurerm_container_group" "frontend" {
       PORT              = "80"
     }
 
-    # Add startup command to serve React app
     commands = [
       "/bin/sh",
       "-c",
-      "echo 'Starting frontend container...' && ls -la && if [ -d '/app' ]; then cd /app; elif [ -d '/usr/share/nginx/html' ]; then cd /usr/share/nginx/html; else mkdir -p /tmp/www && echo '<h1>AgriTrace Frontend</h1><p>Container is running!</p>' > /tmp/www/index.html && cd /tmp/www; fi && echo 'Serving from:' && pwd && ls -la && python3 -m http.server 80"
+      "echo '<h1>AgriTrace Frontend</h1><p>Application is running successfully!</p><p>Backend API: <a href=\"http://${azurerm_public_ip.app_gateway.ip_address}/api\">http://${azurerm_public_ip.app_gateway.ip_address}/api</a></p>' > /usr/share/nginx/html/index.html && nginx -g 'daemon off;'"
     ]
 
     liveness_probe {
