@@ -68,7 +68,7 @@ resource "azurerm_application_gateway" "main" {
   backend_http_settings {
     name                  = "backend-http-settings"
     cookie_based_affinity = "Disabled"
-    path                  = "/api/"
+    path                  = "/"
     port                  = var.app_port
     protocol              = "Http"
     request_timeout       = 60
