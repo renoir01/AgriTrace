@@ -108,7 +108,7 @@ resource "azurerm_container_group" "frontend" {
     commands = [
       "/bin/sh",
       "-c",
-      "if [ -d 'build' ]; then cd build && python3 -m http.server 80; else echo 'No build directory found' && sleep 3600; fi"
+      "echo 'Building React app...' && npm run build && echo 'Starting server...' && cd build && python3 -m http.server 80"
     ]
 
     liveness_probe {
