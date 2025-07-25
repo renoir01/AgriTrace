@@ -135,12 +135,6 @@ resource "azurerm_container_group" "frontend" {
     }
   }
 
-  image_registry_credential {
-    server   = azurerm_container_registry.main.login_server
-    username = azurerm_container_registry.main.admin_username
-    password = azurerm_container_registry.main.admin_password
-  }
-
   tags = local.common_tags
 }
 
