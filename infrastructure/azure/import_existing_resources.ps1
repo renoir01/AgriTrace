@@ -43,10 +43,10 @@ terraform import azurerm_key_vault.main "/subscriptions/ef573996-fc64-430c-88d1-
 
 # Key Vault Secrets
 Write-Host "Importing Key Vault Secrets..." -ForegroundColor Yellow
-terraform import azurerm_key_vault_secret.db_password "https://agritrace-dev-kv.vault.azure.net/secrets/db-password"
-terraform import azurerm_key_vault_secret.acr_username "https://agritrace-dev-kv.vault.azure.net/secrets/acr-username"
-terraform import azurerm_key_vault_secret.acr_password "https://agritrace-dev-kv.vault.azure.net/secrets/acr-password"
-terraform import azurerm_key_vault_secret.db_connection_string "https://agritrace-dev-kv.vault.azure.net/secrets/db-connection-string"
+terraform import azurerm_key_vault_secret.db_password "https://agritrace-dev-kv.vault.azure.net/secrets/db-password/3c19d015f84544c8badda209e784e8ad"
+terraform import azurerm_key_vault_secret.acr_username "https://agritrace-dev-kv.vault.azure.net/secrets/acr-username/b68a3dd786364a1a99e076e9cb1b5445"
+terraform import azurerm_key_vault_secret.acr_password "https://agritrace-dev-kv.vault.azure.net/secrets/acr-password/2d4ab0d94d2b4c5db127e2d2c2a6721b"
+terraform import azurerm_key_vault_secret.db_connection_string "https://agritrace-dev-kv.vault.azure.net/secrets/db-connection-string/f73d96b505b44d04b82fc15f965c744d"
 
 # Private DNS Zone
 Write-Host "Importing Private DNS Zone..." -ForegroundColor Yellow
