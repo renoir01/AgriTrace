@@ -80,7 +80,7 @@ resource "azurerm_application_gateway" "main" {
   probe {
     name                = "frontend-health-probe"
     protocol            = "Http"
-    path                = "/health"
+    path                = "/"
     host                = "127.0.0.1"
     interval            = 30
     timeout             = 30
