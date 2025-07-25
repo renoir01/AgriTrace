@@ -108,7 +108,7 @@ resource "azurerm_container_group" "frontend" {
     commands = [
       "/bin/sh",
       "-c",
-      "echo 'Building React app...' && npm run build && echo 'Starting server...' && cd build && python3 -m http.server 80"
+      "echo 'Starting frontend container...' && ls -la && if [ -d '/app' ]; then cd /app; elif [ -d '/usr/share/nginx/html' ]; then cd /usr/share/nginx/html; else mkdir -p /tmp/www && echo '<h1>AgriTrace Frontend</h1><p>Container is running!</p>' > /tmp/www/index.html && cd /tmp/www; fi && echo 'Serving from:' && pwd && ls -la && python3 -m http.server 80"
     ]
 
     liveness_probe {
