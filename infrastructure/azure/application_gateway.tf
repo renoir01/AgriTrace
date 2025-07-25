@@ -146,6 +146,13 @@ resource "azurerm_application_gateway" "main" {
       backend_address_pool_name  = "backend-api-pool"
       backend_http_settings_name = "backend-http-settings"
     }
+
+    path_rule {
+      name                       = "swagger-rule"
+      paths                      = ["/swagger/*"]
+      backend_address_pool_name  = "backend-api-pool"
+      backend_http_settings_name = "backend-http-settings"
+    }
   }
 
   # Request routing rule
