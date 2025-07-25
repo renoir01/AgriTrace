@@ -1,8 +1,10 @@
 # Import all Azure resources into Terraform state
 # Run this script from the infrastructure/azure directory
 # Includes all resources that need to be imported
+# Script continues even if some resources are already imported
 
 Write-Host "Starting import of all Azure resources..." -ForegroundColor Green
+Write-Host "Note: Some import errors are expected if resources are already imported." -ForegroundColor Yellow
 
 # Resource Group
 Write-Host "Importing Resource Group..." -ForegroundColor Yellow
@@ -73,7 +75,16 @@ terraform import azurerm_container_group.backend "/subscriptions/ef573996-fc64-4
 Write-Host "Importing Application Gateway..." -ForegroundColor Yellow
 terraform import azurerm_application_gateway.main "/subscriptions/ef573996-fc64-430c-88d1-a5da1fc15677/resourceGroups/agritrace-dev-rg/providers/Microsoft.Network/applicationGateways/agritrace-dev-appgw"
 
+# Import missing ACR password secret if needed
+Write-Host "Importing missing ACR password secret..." -ForegroundColor Yellow
+try {
+    terraform import azurerm_key_vault_secret.acr_password "https://agritrace-dev-kv.vault.azure.net/secrets/acr-password/2d4ab0d94d2b4c5db127e2d2c2a6721b"
+} catch {
+    Write-Host "ACR password secret import failed (may already be imported): $($_.Exception.Message)" -ForegroundColor Yellow
+}
+
 Write-Host "Import completed! Verifying imported resources..." -ForegroundColor Green
 terraform state list
 
 Write-Host "You can now run 'terraform plan' to see what changes need to be made." -ForegroundColor Green
+Write-Host "If you see import errors, some resources may already be imported or have different version IDs." -ForegroundColor Yellow
