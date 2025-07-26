@@ -1,21 +1,43 @@
 # Variables for AgriTrace Azure Infrastructure
+# This file defines all configurable parameters for the infrastructure deployment
 
 variable "azure_location" {
-  description = "Azure region for resources"
+  description = "Azure region where all resources will be deployed"
   type        = string
   default     = "East US"
+  
+  validation {
+    condition = contains([
+      "East US", "East US 2", "West US", "West US 2", "West US 3",
+      "Central US", "North Central US", "South Central US", "West Central US",
+      "Canada Central", "Canada East", "Brazil South", "UK South", "UK West",
+      "West Europe", "North Europe", "France Central", "Germany West Central",
+      "Switzerland North", "Norway East", "Sweden Central"
+    ], var.azure_location)
+    error_message = "Azure location must be a valid Azure region."
+  }
 }
 
 variable "environment" {
-  description = "Environment name (dev, staging, prod)"
+  description = "Environment name for resource tagging and naming (dev, staging, prod)"
   type        = string
   default     = "dev"
+  
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod."
+  }
 }
 
 variable "project_name" {
-  description = "Name of the project"
+  description = "Name of the project used for resource naming and tagging"
   type        = string
   default     = "agritrace"
+  
+  validation {
+    condition     = can(regex("^[a-z0-9-]{3,20}$", var.project_name))
+    error_message = "Project name must be 3-20 characters, lowercase letters, numbers, and hyphens only."
+  }
 }
 
 variable "vnet_cidr" {
@@ -67,9 +89,54 @@ variable "container_cpu" {
 }
 
 variable "container_memory" {
-  description = "Memory in GB for container instances"
+  description = "Memory allocation for containers in GB"
   type        = number
-  default     = 2
+  default     = 1.5
+  
+  validation {
+    condition     = var.container_memory >= 0.5 && var.container_memory <= 16
+    error_message = "Container memory must be between 0.5 and 16 GB."
+  }
+}
+
+variable "django_settings_module" {
+  description = "Django settings module to use"
+  type        = string
+  default     = "agritrace_project.settings"
+}
+
+variable "django_debug" {
+  description = "Enable Django debug mode (should be false in production)"
+  type        = bool
+  default     = false
+}
+
+variable "container_restart_policy" {
+  description = "Restart policy for containers"
+  type        = string
+  default     = "Always"
+  
+  validation {
+    condition     = contains(["Always", "Never", "OnFailure"], var.container_restart_policy)
+    error_message = "Container restart policy must be one of: Always, Never, OnFailure."
+  }
+}
+
+variable "health_check_path" {
+  description = "Health check endpoint path"
+  type        = string
+  default     = "/api/v1/health/"
+}
+
+variable "health_check_interval" {
+  description = "Health check interval in seconds"
+  type        = number
+  default     = 30
+  
+  validation {
+    condition     = var.health_check_interval >= 10 && var.health_check_interval <= 300
+    error_message = "Health check interval must be between 10 and 300 seconds."
+  }
 }
 
 variable "app_port" {

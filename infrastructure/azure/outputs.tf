@@ -1,4 +1,13 @@
 # Outputs for AgriTrace Azure Infrastructure
+# This file defines all output values that can be referenced by other Terraform configurations
+# or used for integration with CI/CD pipelines and external systems
+#
+# Output categories:
+# - Network Infrastructure: VNet, subnets, and networking components
+# - Database: PostgreSQL server connection details
+# - Container Services: Registry and container instance information
+# - Load Balancing: Application Gateway and public endpoints
+# - Security: Key Vault and access credentials
 
 output "resource_group_name" {
   description = "Name of the resource group"
