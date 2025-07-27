@@ -22,6 +22,7 @@ from django.shortcuts import redirect
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from core.health_views import health_check, readiness_check, liveness_check
 
 # API Documentation setup
 schema_view = get_schema_view(
@@ -45,6 +46,10 @@ urlpatterns = [
     path('', root_redirect, name='root'),
     path("admin/", admin.site.urls),
     path('api/v1/', include('core.urls')),
+    # Health check endpoints
+    path('api/health/', health_check, name='health_check'),
+    path('api/ready/', readiness_check, name='readiness_check'),
+    path('api/live/', liveness_check, name='liveness_check'),
     path('api-auth/', include('rest_framework.urls')),
     
     # Django authentication URLs

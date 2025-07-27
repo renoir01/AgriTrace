@@ -1,10 +1,20 @@
-name: AgriTrace CI
+name: AgriTrace CI/CD Pipeline
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
 
 jobs:
   backend-tests:
@@ -84,9 +94,48 @@ jobs:
           cd frontend
           CI=true npm test -- --passWithNoTests
 
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python for dependency scanning
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install safety for dependency scanning
+        run: pip install safety
+      
+      - name: Run dependency vulnerability scan
+        run: |
+          cd backend
+          safety check -r requirements.txt --json > ../security-report-deps.json || true
+          echo "Dependency scan completed"
+      
+      - name: Set up Node.js for frontend dependency scanning
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      
+      - name: Install npm audit for frontend scanning
+        run: |
+          cd frontend
+          npm audit --audit-level=moderate --json > ../security-report-frontend.json || true
+          echo "Frontend dependency scan completed"
+      
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-reports
+          path: |
+            security-report-*.json
+          retention-days: 30
+
   docker-build-push:
     runs-on: ubuntu-latest
-    needs: [backend-tests, frontend-tests]  # Ensure both backend and frontend tests pass
+    needs: [security-scan]
     env:
       REGISTRY: agritracedevacr.azurecr.io
       ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
@@ -94,20 +143,167 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Check Docker version
-        run: docker --version
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
       
       - name: Login to Azure Container Registry
         run: echo $ACR_PASSWORD | docker login $REGISTRY -u $ACR_USERNAME --password-stdin
       
-      - name: Build Backend Docker image
-        run: docker build -t $REGISTRY/agritrace-backend:latest ./backend
+      - name: Build and scan Backend Docker image
+        run: |
+          docker build -t $REGISTRY/agritrace-backend:${{ github.sha }} -t $REGISTRY/agritrace-backend:latest ./backend
+          # Container security scanning with Trivy
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v ${{ github.workspace }}:/workspace \
+            aquasec/trivy:latest image --format json --output /workspace/backend-container-scan.json \
+            $REGISTRY/agritrace-backend:latest || true
       
-      - name: Push Backend Docker image
-        run: docker push $REGISTRY/agritrace-backend:latest
+      - name: Build and scan Frontend Docker image
+        run: |
+          docker build -t $REGISTRY/agritrace-frontend:${{ github.sha }} -t $REGISTRY/agritrace-frontend:latest ./frontend
+          # Container security scanning with Trivy
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v ${{ github.workspace }}:/workspace \
+            aquasec/trivy:latest image --format json --output /workspace/frontend-container-scan.json \
+            $REGISTRY/agritrace-frontend:latest || true
       
-      - name: Build Frontend Docker image
-        run: docker build -t $REGISTRY/agritrace-frontend:latest ./frontend
+      - name: Push Docker images
+        run: |
+          docker push $REGISTRY/agritrace-backend:${{ github.sha }}
+          docker push $REGISTRY/agritrace-backend:latest
+          docker push $REGISTRY/agritrace-frontend:${{ github.sha }}
+          docker push $REGISTRY/agritrace-frontend:latest
       
-      - name: Push Frontend Docker image
-        run: docker push $REGISTRY/agritrace-frontend:latest
+      - name: Upload container security reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: container-security-reports
+          path: |
+            *-container-scan.json
+          retention-days: 30
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [docker-build-push]
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment:
+      name: staging
+      url: https://agritrace-staging.azurewebsites.net
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploy to Azure Container Instances (Staging)
+        run: |
+          az container create \
+            --resource-group agritrace-dev-rg \
+            --name agritrace-staging-backend \
+            --image agritracedevacr.azurecr.io/agritrace-backend:${{ github.sha }} \
+            --registry-login-server agritracedevacr.azurecr.io \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }} \
+            --dns-name-label agritrace-staging-api \
+            --ports 8000 \
+            --environment-variables \
+              DJANGO_SETTINGS_MODULE=agritrace_project.settings \
+              DEBUG=False \
+              ALLOWED_HOSTS=agritrace-staging-api.eastus.azurecontainer.io,agritrace-staging.azurewebsites.net \
+            --restart-policy Always || true
+          
+          az container create \
+            --resource-group agritrace-dev-rg \
+            --name agritrace-staging-frontend \
+            --image agritracedevacr.azurecr.io/agritrace-frontend:${{ github.sha }} \
+            --registry-login-server agritracedevacr.azurecr.io \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }} \
+            --dns-name-label agritrace-staging \
+            --ports 80 \
+            --environment-variables \
+              REACT_APP_API_URL=https://agritrace-staging-api.eastus.azurecontainer.io:8000 \
+            --restart-policy Always || true
+      
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for containers to be ready..."
+          sleep 60
+          
+      - name: Health check
+        run: |
+          echo "Performing health checks..."
+          curl -f https://agritrace-staging.eastus.azurecontainer.io/health || echo "Frontend health check failed"
+          curl -f https://agritrace-staging-api.eastus.azurecontainer.io:8000/api/health/ || echo "Backend health check failed"
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [docker-build-push]
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment:
+      name: production
+      url: https://agritrace.azurewebsites.net
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploy to Azure Container Instances (Production)
+        run: |
+          az container create \
+            --resource-group agritrace-dev-rg \
+            --name agritrace-prod-backend \
+            --image agritracedevacr.azurecr.io/agritrace-backend:${{ github.sha }} \
+            --registry-login-server agritracedevacr.azurecr.io \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }} \
+            --dns-name-label agritrace-api \
+            --ports 8000 \
+            --environment-variables \
+              DJANGO_SETTINGS_MODULE=agritrace_project.settings \
+              DEBUG=False \
+              ALLOWED_HOSTS=agritrace-api.eastus.azurecontainer.io,agritrace.azurewebsites.net \
+            --restart-policy Always || true
+          
+          az container create \
+            --resource-group agritrace-dev-rg \
+            --name agritrace-prod-frontend \
+            --image agritracedevacr.azurecr.io/agritrace-frontend:${{ github.sha }} \
+            --registry-login-server agritracedevacr.azurecr.io \
+            --registry-username ${{ secrets.ACR_USERNAME }} \
+            --registry-password ${{ secrets.ACR_PASSWORD }} \
+            --dns-name-label agritrace-prod \
+            --ports 80 \
+            --environment-variables \
+              REACT_APP_API_URL=https://agritrace-api.eastus.azurecontainer.io:8000 \
+            --restart-policy Always || true
+      
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for containers to be ready..."
+          sleep 60
+          
+      - name: Health check
+        run: |
+          echo "Performing health checks..."
+          curl -f https://agritrace-prod.eastus.azurecontainer.io/health || echo "Frontend health check failed"
+          curl -f https://agritrace-api.eastus.azurecontainer.io:8000/api/health/ || echo "Backend health check failed"
+      
+      - name: Update CHANGELOG
+        run: |
+          echo "## [$(date +'%Y.%m.%d')] - $(date +'%Y-%m-%d')" >> CHANGELOG.md
+          echo "### Added" >> CHANGELOG.md
+          echo "- Automated deployment via CI/CD pipeline" >> CHANGELOG.md
+          echo "- Security scanning integration" >> CHANGELOG.md
+          echo "- Production deployment with commit SHA: ${{ github.sha }}" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add CHANGELOG.md
+          git commit -m "chore: update changelog for deployment ${{ github.sha }}" || echo "No changes to commit"
+          git push || echo "No changes to push"
