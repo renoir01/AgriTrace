@@ -98,7 +98,7 @@ resource "azurerm_container_group" "frontend" {
 
   container {
     name   = "frontend"
-    image  = "mcr.microsoft.com/oss/nginx/nginx:1.21-alpine"
+    image  = "mcr.microsoft.com/azuredocs/aci-helloworld:latest"
     cpu    = var.container_cpu
     memory = var.container_memory
 
@@ -112,71 +112,7 @@ resource "azurerm_container_group" "frontend" {
       PORT              = "80"
     }
 
-    commands = [
-      "/bin/sh",
-      "-c",
-      <<-EOT
-        cat > /usr/share/nginx/html/index.html << 'EOF'
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgriTrace - Agricultural Traceability Platform</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .container { max-width: 800px; margin: 0 auto; text-align: center; }
-        .status-card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; margin: 20px 0; backdrop-filter: blur(10px); }
-        .success { color: #4CAF50; font-weight: bold; }
-        .api-link { color: #FFD700; text-decoration: none; font-weight: bold; }
-        .api-link:hover { text-decoration: underline; }
-        h1 { font-size: 3em; margin-bottom: 10px; }
-        h2 { color: #4CAF50; }
-        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; }
-        @media (max-width: 600px) { .status-grid { grid-template-columns: 1fr; } }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🌱 AgriTrace</h1>
-        <p style="font-size: 1.2em; margin-bottom: 30px;">Agricultural Traceability Platform</p>
-        
-        <div class="status-grid">
-            <div class="status-card">
-                <h2>Frontend Status</h2>
-                <p class="success">✅ RUNNING SUCCESSFULLY</p>
-                <p>Nginx web server active</p>
-                <p>Application Gateway connected</p>
-            </div>
-            
-            <div class="status-card">
-                <h2>Backend Status</h2>
-                <p class="success">✅ RUNNING SUCCESSFULLY</p>
-                <p>Django API server active</p>
-                <p>Database connected</p>
-            </div>
-        </div>
-        
-        <div class="status-card">
-            <h2>🔗 API Endpoints</h2>
-            <p><a href="/api/v1/" class="api-link">REST API</a> | <a href="/admin/" class="api-link">Admin Panel</a> | <a href="/swagger/" class="api-link">API Documentation</a></p>
-            <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.8;">Public URL: http://${azurerm_public_ip.app_gateway.ip_address}</p>
-        </div>
-        
-        <div class="status-card">
-            <h2>🚀 System Information</h2>
-            <p><strong>Environment:</strong> Development</p>
-            <p><strong>Infrastructure:</strong> Azure Container Instances</p>
-            <p><strong>Load Balancer:</strong> Azure Application Gateway</p>
-            <p><strong>Database:</strong> PostgreSQL Flexible Server</p>
-        </div>
-    </div>
-</body>
-</html>
-EOF
-        nginx -g 'daemon off;'
-      EOT
-  ]
+
 
     liveness_probe {
       http_get {
