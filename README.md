@@ -1,8 +1,31 @@
-# AgriTrace
+# AgriTrace - Phase 3: Full Automated Deployment
 
-[![CI Status](https://github.com/renoir01/AgriTrace/workflows/CI/badge.svg)](https://github.com/renoir01/AgriTrace/actions)
+[![CI/CD Pipeline](https://github.com/renoir01/AgriTrace/workflows/AgriTrace%20CI/CD%20Pipeline/badge.svg)](https://github.com/renoir01/AgriTrace/actions)
+[![Security Scan](https://img.shields.io/badge/security-scanned-green.svg)](https://github.com/renoir01/AgriTrace/actions)
+[![Deployment](https://img.shields.io/badge/deployment-automated-blue.svg)](https://github.com/renoir01/AgriTrace/actions)
 
 Agricultural supply chain traceability platform - bringing transparency from farm to consumer.
+
+## 🌐 Live Application URLs
+
+### Production Environment
+- **Frontend**: https://agritrace-prod.eastus.azurecontainer.io
+- **Backend API**: https://agritrace-api.eastus.azurecontainer.io:8000
+- **API Documentation**: https://agritrace-api.eastus.azurecontainer.io:8000/swagger/
+- **Admin Panel**: https://agritrace-api.eastus.azurecontainer.io:8000/admin/
+- **Health Check**: https://agritrace-api.eastus.azurecontainer.io:8000/api/health/
+
+### Staging Environment
+- **Frontend**: https://agritrace-staging.eastus.azurecontainer.io
+- **Backend API**: https://agritrace-staging-api.eastus.azurecontainer.io:8000
+- **API Documentation**: https://agritrace-staging-api.eastus.azurecontainer.io:8000/swagger/
+- **Health Check**: https://agritrace-staging-api.eastus.azurecontainer.io:8000/api/health/
+
+## 🎥 Video Demonstration
+
+**Phase 3 Video Demonstration**: [Video Link - To be uploaded]
+
+*Professional video demonstration showcasing the complete CI/CD pipeline, security scanning, automated deployment, and monitoring system functionality.*
 
 ## Project Overview
 
@@ -19,13 +42,32 @@ AgriTrace is a comprehensive platform designed to enhance transparency and trace
 
 ## Technology Stack
 
+### Core Application
 - **Backend**: Python/Django REST Framework
 - **Frontend**: React.js with Material-UI
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL Flexible Server
 - **Authentication**: JWT (JSON Web Tokens)
-- **Containerization**: Docker
-- **CI/CD**: GitHub Actions
-- **Cloud Deployment**: Azure/AWS
+- **Containerization**: Docker with multi-stage builds
+
+### DevOps & Infrastructure
+- **CI/CD Pipeline**: GitHub Actions with automated deployment
+- **Container Registry**: Azure Container Registry (ACR)
+- **Cloud Platform**: Microsoft Azure
+- **Infrastructure as Code**: Terraform
+- **Container Orchestration**: Azure Container Instances (ACI)
+- **Load Balancing**: Azure Application Gateway
+- **Monitoring**: Azure Monitor with custom dashboards
+- **Security Scanning**: 
+  - Dependency scanning with Safety (Python)
+  - Container image scanning with Trivy
+  - NPM audit for frontend dependencies
+
+### Deployment Architecture
+- **Production**: Azure Container Instances with Application Gateway
+- **Staging**: Separate container instances for testing
+- **Database**: Azure PostgreSQL Flexible Server with private networking
+- **Storage**: Azure Container Registry for secure image storage
+- **Networking**: Virtual Network with private subnets and NSG rules
 
 ## Project Structure
 

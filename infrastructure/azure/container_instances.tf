@@ -24,9 +24,6 @@ resource "azurerm_container_group" "backend" {
       protocol = "TCP"
     }
 
-    # Set working directory to match Dockerfile
-    working_directory = "/app"
-
     # Environment variables for Django application configuration
     # These are non-sensitive configuration values
     environment_variables = {
