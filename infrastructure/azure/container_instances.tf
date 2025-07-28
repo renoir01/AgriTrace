@@ -98,7 +98,7 @@ resource "azurerm_container_group" "frontend" {
 
   container {
     name   = "frontend"
-    image  = "nginx:alpine"
+    image  = "mcr.microsoft.com/oss/nginx/nginx:1.21-alpine"
     cpu    = var.container_cpu
     memory = var.container_memory
 
