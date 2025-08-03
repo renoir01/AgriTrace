@@ -17,6 +17,7 @@ import TraceabilityDetail from './pages/traceability/TraceabilityDetail';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import NotFound from './pages/NotFound';
+import Health from './pages/Health';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -33,6 +34,9 @@ function App() {
   return (
     <Box sx={{ display: 'flex' }}>
       <Routes>
+        {/* Public health check endpoint */}
+        <Route path="/health" element={<Health />} />
+        
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

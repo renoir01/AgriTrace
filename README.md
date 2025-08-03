@@ -1,31 +1,81 @@
 # AgriTrace - Phase 3: Full Automated Deployment
 
-[![CI/CD Pipeline](https://github.com/renoir01/AgriTrace/workflows/AgriTrace%20CI/CD%20Pipeline/badge.svg)](https://github.com/renoir01/AgriTrace/actions)
+[![CI/CD Pipeline](https://github.com/renoir01/AgriTrace/workflows/AgriTrace%20Full%20Automated%20Deployment/badge.svg)](https://github.com/renoir01/AgriTrace/actions)
 [![Security Scan](https://img.shields.io/badge/security-scanned-green.svg)](https://github.com/renoir01/AgriTrace/actions)
 [![Deployment](https://img.shields.io/badge/deployment-automated-blue.svg)](https://github.com/renoir01/AgriTrace/actions)
 
-Agricultural supply chain traceability platform - bringing transparency from farm to consumer.
+Agricultural supply chain traceability platform - bringing transparency from farm to consumer with professional-grade DevOps practices.
 
-## 🌐 Live Application URLs
+## 🌐 Deployment Architecture
 
-### Production Environment
-- **Frontend**: https://agritrace-prod.eastus.azurecontainer.io
-- **Backend API**: https://agritrace-api.eastus.azurecontainer.io:8000
-- **API Documentation**: https://agritrace-api.eastus.azurecontainer.io:8000/swagger/
-- **Admin Panel**: https://agritrace-api.eastus.azurecontainer.io:8000/admin/
-- **Health Check**: https://agritrace-api.eastus.azurecontainer.io:8000/api/health/
+### Public Deployment
+AgriTrace is deployed with public endpoints on Azure Container Instances, making it accessible from anywhere on the internet for demonstration and assessment purposes.
 
-### Staging Environment
-- **Frontend**: https://agritrace-staging.eastus.azurecontainer.io
-- **Backend API**: https://agritrace-staging-api.eastus.azurecontainer.io:8000
-- **API Documentation**: https://agritrace-staging-api.eastus.azurecontainer.io:8000/swagger/
-- **Health Check**: https://agritrace-staging-api.eastus.azurecontainer.io:8000/api/health/
+### Container Instances
+- **Production Frontend**: Public FQDN: agritrace-prod.centralus.azurecontainer.io (IP: 4.249.237.104)
+- **Production Backend**: Public FQDN: agritrace-prod-api.centralus.azurecontainer.io (IP: 128.203.247.96)
+- **Staging Frontend**: Public FQDN: agritrace-staging.centralus.azurecontainer.io (IP: 20.15.197.221)
+- **Staging Backend**: Public FQDN: agritrace-staging-api.centralus.azurecontainer.io (IP: 172.169.45.84)
+
+### Access Methods
+- **Direct Access**: All container instances are publicly accessible via their FQDNs
+- **Azure Portal**: Resources viewable in Azure Portal under resource group `agritrace-dev-rg`
+- **Container Registry**: Images stored in `agritracedevacr.azurecr.io`
+
+### Endpoints
+- **Production Frontend**: http://agritrace-prod.centralus.azurecontainer.io (Port 80)
+- **Production Backend**: http://agritrace-prod-api.centralus.azurecontainer.io:8000
+- **Staging Frontend**: http://agritrace-staging.centralus.azurecontainer.io (Port 80)
+- **Staging Backend**: http://agritrace-staging-api.centralus.azurecontainer.io:8000
+- **API Documentation**: /swagger/
+- **Admin Panel**: /admin/
+- **Health Check**: /api/health/
+- **Readiness Probe**: /api/ready/
+- **Liveness Probe**: /api/live/
 
 ## 🎥 Video Demonstration
 
 **Phase 3 Video Demonstration**: [Video Link - To be uploaded]
 
-*Professional video demonstration showcasing the complete CI/CD pipeline, security scanning, automated deployment, and monitoring system functionality.*
+*Professional video demonstration showcasing the complete CI/CD pipeline, security scanning, automated deployment, and monitoring system functionality with publicly accessible endpoints for direct verification.*
+
+### Demo Approach
+With the application now deployed with public endpoints, the video demonstration will include:
+
+1. **GitHub Actions Workflow Execution**: Showing the complete CI/CD pipeline in action
+2. **Azure Resources**: Displaying the deployed container instances with public IPs and FQDNs
+3. **Live Application Demo**: Accessing the application directly via public URLs
+4. **API Verification**: Testing backend API endpoints and health checks
+5. **Container Registry**: Demonstrating image building, scanning, and storage
+6. **Monitoring Dashboard**: Showcasing the Azure Monitor configuration and alerts
+
+## 🚀 Continuous Deployment Pipeline
+
+AgriTrace features a professional-grade, fully automated continuous deployment pipeline that follows modern DevOps and DevSecOps best practices:
+
+### Pipeline Stages
+1. **Code Build & Test**: Automated building and testing of both backend and frontend components
+2. **Security Scanning**: Comprehensive security checks for dependencies and container images
+3. **Container Build & Push**: Multi-stage Docker builds with optimized images
+4. **Staging Deployment**: Automatic deployment to staging environment for testing
+5. **Production Approval**: Manual approval gate for production deployments
+6. **Production Deployment**: Zero-downtime deployment to production environment
+7. **Health Verification**: Automated health checks to verify successful deployment
+8. **Documentation Update**: Automatic CHANGELOG updates following conventional commit standards
+
+### Security Features
+- Python dependency vulnerability scanning with Safety
+- Node.js dependency scanning with npm audit
+- Container image scanning with Trivy
+- Comprehensive security reports generated as artifacts
+- Remediation documentation for identified vulnerabilities
+
+### Monitoring & Observability
+- Azure Monitor dashboard with real-time metrics
+- Structured JSON logging for all application components
+- Operational alarms for error rates and response times
+- Health check endpoints for infrastructure monitoring
+- Comprehensive deployment reports
 
 ## Project Overview
 

@@ -1,15 +1,15 @@
 # Azure Container Instances for AgriTrace
 # This file defines container groups for running the AgriTrace application components
-# Uses private networking for security and integrates with Application Gateway for load balancing
+# Uses public networking for accessibility and demonstration purposes
 
 # Container Group for Backend Django Application
-# Runs in private subnet for security, accessible only through Application Gateway
+# Public container instance for demonstration and assessment purposes
 resource "azurerm_container_group" "backend" {
   name                = "${local.name_prefix}-backend-ci"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  ip_address_type     = "Private"  # Private IP for security
-  subnet_ids          = [azurerm_subnet.private.id]
+  ip_address_type     = "Public"  # Public IP for accessibility
+  dns_name_label      = "${local.name_prefix}-api" # DNS label for public FQDN
   os_type             = "Linux"
   restart_policy      = var.container_restart_policy
 
@@ -32,8 +32,8 @@ resource "azurerm_container_group" "backend" {
       DB_PORT               = "5432"  # PostgreSQL default port
       DB_NAME               = var.db_name
       DB_USER               = var.db_admin_username
-      # Allow access from Application Gateway, localhost, and private networks
-      ALLOWED_HOSTS         = "${azurerm_public_ip.app_gateway.ip_address},localhost,127.0.0.1,169.254.128.5,10.0.0.0/8,*"
+      # Allow access from public endpoints, localhost, and private networks
+      ALLOWED_HOSTS         = "${local.name_prefix}-api.${var.location}.azurecontainer.io,${local.name_prefix}.${var.location}.azurecontainer.io,localhost,127.0.0.1,*"
       DEBUG                 = tostring(var.django_debug)
       PORT                  = tostring(var.app_port)
       # Additional Django configuration
@@ -91,8 +91,8 @@ resource "azurerm_container_group" "frontend" {
   name                = "${local.name_prefix}-frontend-ci"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  ip_address_type     = "Private"
-  subnet_ids          = [azurerm_subnet.private.id]
+  ip_address_type     = "Public"
+  dns_name_label      = "${local.name_prefix}" # DNS label for public FQDN
   os_type             = "Linux"
   restart_policy      = "Always"
 
@@ -108,7 +108,7 @@ resource "azurerm_container_group" "frontend" {
     }
 
     environment_variables = {
-      REACT_APP_API_URL = "http://${azurerm_public_ip.app_gateway.ip_address}/api"
+      REACT_APP_API_URL = "http://${local.name_prefix}-api.${var.location}.azurecontainer.io:8000/api"
       PORT              = "80"
     }
 

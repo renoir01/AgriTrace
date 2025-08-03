@@ -1,0 +1,122 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  DOCKER_IMAGE: agritrace
+  AZURE_CONTAINER_REGISTRY: agritraceacr.azurecr.io
+  RESOURCE_GROUP: agritrace-dev-rg
+  CONTAINER_GROUP: agritrace-dev-frontend-ci
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Run tests
+      run: |
+        python manage.py test
+        cd frontend && npm ci && npm test
+
+    - name: Run security checks
+      run: |
+        # Dependency security scanning
+        pip install safety
+        safety check --full-report
+        
+        # Node.js dependency scanning
+        cd frontend
+        npm audit --production
+
+  build-and-push:
+    name: Build and Push Container
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Login to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.AZURE_CONTAINER_REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }} .
+        docker push ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build-and-push
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to Azure Container Instances
+      uses: azure/aci-deploy@v1
+      with:
+        resource-group: ${{ env.RESOURCE_GROUP }}
+        dns-name-label: agritrace-staging
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+        registry-username: ${{ secrets.ACR_USERNAME }}
+        registry-password: ${{ secrets.ACR_PASSWORD }}
+        name: ${{ env.CONTAINER_GROUP }}-staging
+        location: 'eastus'
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [build-and-push, deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Deploy to Azure Container Instances
+      uses: azure/aci-deploy@v1
+      with:
+        resource-group: ${{ env.RESOURCE_GROUP }}
+        dns-name-label: agritrace-prod
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+        registry-username: ${{ secrets.ACR_USERNAME }}
+        registry-password: ${{ secrets.ACR_PASSWORD }}
+        name: ${{ env.CONTAINER_GROUP }}-prod
+        location: 'eastus'
+    
+    - name: Update CHANGELOG.md
+      run: |
+        echo "# Changelog" > CHANGELOG.md
+        git log --pretty=format:"## [%h] - %ad%n%an%n%n* %s%n" --date=short >> CHANGELOG.md
+    
+    - name: Commit and push CHANGELOG.md
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+        git add CHANGELOG.md
+        git commit -m "chore: update changelog for ${{ github.sha }}" || echo "No changes to commit"
+        git push || echo "No changes to push"
