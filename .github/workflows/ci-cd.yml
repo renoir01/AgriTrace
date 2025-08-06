@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+# Add permissions needed for OIDC authentication with Azure
+permissions:
+  id-token: write
+  contents: read
+
 env:
   DOCKER_IMAGE: agritrace
   AZURE_CONTAINER_REGISTRY: agritracedevacr.azurecr.io
