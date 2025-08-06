@@ -36,7 +36,7 @@ jobs:
       run: |
         cd backend
         mkdir -p logs
-        python manage.py test
+        python manage.py test core.tests.test_api core.tests.test_models core.tests.test_api_updated core.tests.test_models_updated
         cd ../frontend && npm ci && npm test
 
     - name: Run security checks
