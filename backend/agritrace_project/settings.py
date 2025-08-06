@@ -9,9 +9,9 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
-from pathlib import Path
 import os
+import sys
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -188,11 +188,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Azure Monitor Configuration
 APPLICATION_INSIGHTS_CONNECTION_STRING = os.environ.get('APPLICATIONINSIGHTS_CONNECTION_STRING', '')
 
-# OpenCensus Azure Monitor configuration
+# Determine if we're in a test environment
+TESTING = 'test' in sys.argv or os.environ.get('DJANGO_SETTINGS_MODULE') == 'agritrace_project.test_settings'
+
+# OpenCensus Azure Monitor configuration - only use Azure exporter if not in test mode
 OPENCENSUS = {
     'TRACE': {
         'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1.0)',
-        'EXPORTER': 'opencensus.ext.azure.trace_exporter.AzureExporter(connection_string="{}")',
+        # Use NullExporter for tests, Azure exporter for production
+        'EXPORTER': 'opencensus.trace.exporters.print_exporter.PrintExporter()' if TESTING else 'opencensus.ext.azure.trace_exporter.AzureExporter(connection_string="{}")'.format(APPLICATION_INSIGHTS_CONNECTION_STRING),
         'PROPAGATOR': 'opencensus.trace.propagation.trace_context_http_header_format.TraceContextPropagator()',
     }
 }

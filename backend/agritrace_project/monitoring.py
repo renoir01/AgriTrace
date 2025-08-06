@@ -4,6 +4,7 @@ This module provides middleware and utilities for monitoring the application usi
 """
 
 import logging
+import sys
 import time
 import os
 from opencensus.ext.azure.log_exporter import AzureLogHandler
@@ -25,16 +26,22 @@ class AzureMonitorMiddleware:
         self.get_response = get_response
         self.logger = logging.getLogger('agritrace_project.monitoring')
         
-        # Set up Azure Monitor if connection string is available
+        # Check if we're in a test environment
+        self.testing = 'test' in sys.argv or os.environ.get('DJANGO_SETTINGS_MODULE') == 'agritrace_project.test_settings'
+        
+        # Set up Azure Monitor if connection string is available and not in test mode
         self.app_insights_key = os.environ.get('APPLICATIONINSIGHTS_CONNECTION_STRING')
-        if self.app_insights_key:
+        if self.app_insights_key and not self.testing:
             # Add Azure Log Handler to the root logger
             azure_handler = AzureLogHandler(connection_string=self.app_insights_key)
             logging.getLogger('').addHandler(azure_handler)
             
             self.logger.info("Azure Monitor integration enabled")
         else:
-            self.logger.warning("Azure Monitor connection string not found, monitoring disabled")
+            if self.testing:
+                self.logger.info("Test environment detected, Azure Monitor disabled")
+            else:
+                self.logger.warning("Azure Monitor connection string not found, monitoring disabled")
 
     def __call__(self, request):
         start_time = time.time()
