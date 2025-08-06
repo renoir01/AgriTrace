@@ -62,6 +62,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Monitoring middleware
+    "agritrace_project.monitoring.AzureMonitorMiddleware",
+    "agritrace_project.monitoring.HealthCheckMiddleware",
+    # OpenCensus middleware for Azure Monitor integration
+    "opencensus.ext.django.middleware.OpencensusMiddleware",
 ]
 
 ROOT_URLCONF = "agritrace_project.urls"
@@ -180,6 +185,18 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Azure Monitor Configuration
+APPLICATION_INSIGHTS_CONNECTION_STRING = os.environ.get('APPLICATIONINSIGHTS_CONNECTION_STRING', '')
+
+# OpenCensus Azure Monitor configuration
+OPENCENSUS = {
+    'TRACE': {
+        'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1.0)',
+        'EXPORTER': 'opencensus.ext.azure.trace_exporter.AzureExporter(connection_string="{}")',
+        'PROPAGATOR': 'opencensus.trace.propagation.trace_context_http_header_format.TraceContextPropagator()',
+    }
+}
+
 # Logging configuration
 LOGGING = {
     'version': 1,
@@ -193,26 +210,83 @@ LOGGING = {
             'format': '{levelname} {message}',
             'style': '{',
         },
+        'json': {
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s',
+            'class': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'datefmt': '%Y-%m-%dT%H:%M:%S%z',
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+            'formatter': 'json' if not DEBUG else 'verbose',
         },
         'file': {
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs/django.log'),
-            'formatter': 'verbose',
+            'formatter': 'json',
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 10,
+        },
+        'error_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/error.log'),
+            'formatter': 'json',
+            'level': 'ERROR',
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 10,
+        },
+        'security_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/security.log'),
+            'formatter': 'json',
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 10,
+        },
+        'api_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/api.log'),
+            'formatter': 'json',
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 10,
         },
     },
     'root': {
-        'handlers': ['console', 'file'],
+        'handlers': ['console', 'file', 'error_file'],
         'level': 'INFO',
     },
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
             'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['security_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'core.api': {
+            'handlers': ['api_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'core.models': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
             'propagate': False,
         },
     },
