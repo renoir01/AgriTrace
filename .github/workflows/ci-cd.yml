@@ -85,18 +85,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    # No Azure login step needed - using ACR credentials directly with aci-deploy
-        
-    - name: Deploy to Azure Container Instances
-      uses: azure/aci-deploy@v1
+    - name: Azure Login
+      uses: azure/login@v1
       with:
-        resource-group: ${{ env.RESOURCE_GROUP }}
-        dns-name-label: agritrace-staging
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-        registry-username: ${{ secrets.ACR_USERNAME }}
-        registry-password: ${{ secrets.ACR_PASSWORD }}
-        name: ${{ env.CONTAINER_GROUP }}-staging
-        location: 'eastus'
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+    - name: Deploy to Azure Container Instances (Staging)
+      run: |
+        az container create \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --name ${{ env.CONTAINER_GROUP }}-staging \
+          --image ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }} \
+          --registry-login-server ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          --registry-username ${{ secrets.ACR_USERNAME }} \
+          --registry-password ${{ secrets.ACR_PASSWORD }} \
+          --dns-name-label agritrace-staging \
+          --location eastus \
+          --os-type Linux \
+          --ip-address public \
+          --ports 80 443 \
+          --restart-policy Always || true
 
   deploy-production:
     name: Deploy to Production
@@ -108,18 +118,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    # No Azure login step needed - using ACR credentials directly with aci-deploy
-        
-    - name: Deploy to Azure Container Instances
-      uses: azure/aci-deploy@v1
+    - name: Azure Login
+      uses: azure/login@v1
       with:
-        resource-group: ${{ env.RESOURCE_GROUP }}
-        dns-name-label: agritrace-prod
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-        registry-username: ${{ secrets.ACR_USERNAME }}
-        registry-password: ${{ secrets.ACR_PASSWORD }}
-        name: ${{ env.CONTAINER_GROUP }}-prod
-        location: 'eastus'
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+    - name: Deploy to Azure Container Instances (Production)
+      run: |
+        az container create \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --name ${{ env.CONTAINER_GROUP }}-prod \
+          --image ${{ env.AZURE_CONTAINER_REGISTRY }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }} \
+          --registry-login-server ${{ env.AZURE_CONTAINER_REGISTRY }} \
+          --registry-username ${{ secrets.ACR_USERNAME }} \
+          --registry-password ${{ secrets.ACR_PASSWORD }} \
+          --dns-name-label agritrace-prod \
+          --location eastus \
+          --os-type Linux \
+          --ip-address public \
+          --ports 80 443 \
+          --restart-policy Always || true
     
     - name: Update CHANGELOG.md
       run: |
