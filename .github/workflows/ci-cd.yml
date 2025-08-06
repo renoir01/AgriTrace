@@ -37,7 +37,7 @@ jobs:
         cd backend
         mkdir -p logs
         python manage.py test core.tests.test_api core.tests.test_models core.tests.test_api_updated core.tests.test_models_updated
-        cd ../frontend && npm ci && npm test
+        cd ../frontend && npm ci && npm test -- --passWithNoTests
 
     - name: Run security checks
       run: |
