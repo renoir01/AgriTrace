@@ -146,7 +146,7 @@ jobs:
           echo "Generated human-readable frontend scan report"
       
       - name: Upload security reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-reports
           path: |
@@ -223,7 +223,7 @@ jobs:
           docker push $REGISTRY/$FRONTEND_IMAGE:latest
       
       - name: Upload container security reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: container-security-reports
           path: |
@@ -468,7 +468,7 @@ jobs:
           echo "- **Backend Liveness:** $(curl -s -o /dev/null -w '%{http_code}' https://agritrace-api.eastus.azurecontainer.io:8000/api/live/ || echo 'Failed')" >> deployment-report.md
       
       - name: Upload deployment report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: deployment-report
           path: deployment-report.md
