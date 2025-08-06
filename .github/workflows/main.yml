@@ -49,6 +49,8 @@ jobs:
           python -m pip install --upgrade pip
           ls -la backend/
           pip install -r backend/requirements.txt
+          # Ensure OpenCensus packages are installed for monitoring
+          pip install opencensus-ext-azure opencensus-ext-django
           
       - name: Lint with flake8
         run: |

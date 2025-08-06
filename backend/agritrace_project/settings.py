@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "core",
 ]
 
+# Define base middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -65,9 +66,14 @@ MIDDLEWARE = [
     # Monitoring middleware
     "agritrace_project.monitoring.AzureMonitorMiddleware",
     "agritrace_project.monitoring.HealthCheckMiddleware",
-    # OpenCensus middleware for Azure Monitor integration
-    "opencensus.ext.django.middleware.OpencensusMiddleware",
 ]
+
+# Add OpenCensus middleware only if it's available
+try:
+    import opencensus.ext.django.middleware
+    MIDDLEWARE.append("opencensus.ext.django.middleware.OpencensusMiddleware")
+except ImportError:
+    pass
 
 ROOT_URLCONF = "agritrace_project.urls"
 
@@ -191,15 +197,33 @@ APPLICATION_INSIGHTS_CONNECTION_STRING = os.environ.get('APPLICATIONINSIGHTS_CON
 # Determine if we're in a test environment
 TESTING = 'test' in sys.argv or os.environ.get('DJANGO_SETTINGS_MODULE') == 'agritrace_project.test_settings'
 
-# OpenCensus Azure Monitor configuration - only use Azure exporter if not in test mode
-OPENCENSUS = {
-    'TRACE': {
-        'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1.0)',
-        # Use NullExporter for tests, Azure exporter for production
-        'EXPORTER': 'opencensus.trace.exporters.print_exporter.PrintExporter()' if TESTING else 'opencensus.ext.azure.trace_exporter.AzureExporter(connection_string="{}")'.format(APPLICATION_INSIGHTS_CONNECTION_STRING),
-        'PROPAGATOR': 'opencensus.trace.propagation.trace_context_http_header_format.TraceContextPropagator()',
+# Check if OpenCensus exporters are available
+try:
+    import opencensus.trace.exporters.print_exporter
+    import opencensus.ext.azure.trace_exporter
+    OPENCENSUS_AVAILABLE = True
+except ImportError:
+    OPENCENSUS_AVAILABLE = False
+
+# OpenCensus Azure Monitor configuration - only use if available and not in test mode
+if OPENCENSUS_AVAILABLE:
+    OPENCENSUS = {
+        'TRACE': {
+            'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1.0)',
+            # Use PrintExporter for tests, Azure exporter for production
+            'EXPORTER': 'opencensus.trace.exporters.print_exporter.PrintExporter()' if TESTING else 'opencensus.ext.azure.trace_exporter.AzureExporter(connection_string="{}")'.format(APPLICATION_INSIGHTS_CONNECTION_STRING),
+            'PROPAGATOR': 'opencensus.trace.propagation.trace_context_http_header_format.TraceContextPropagator()',
+        }
     }
-}
+else:
+    # Fallback configuration when OpenCensus is not available
+    OPENCENSUS = {
+        'TRACE': {
+            'SAMPLER': 'opencensus.trace.samplers.AlwaysOffSampler()',
+            'EXPORTER': None,
+            'PROPAGATOR': 'opencensus.trace.propagation.trace_context_http_header_format.TraceContextPropagator()',
+        }
+    }
 
 # Logging configuration
 LOGGING = {

@@ -7,14 +7,20 @@ import logging
 import sys
 import time
 import os
-from opencensus.ext.azure.log_exporter import AzureLogHandler
-from opencensus.ext.azure.trace_exporter import AzureExporter
-from opencensus.ext.django.middleware import OpencensusMiddleware
-from opencensus.trace.samplers import ProbabilitySampler
-from opencensus.trace import config_integration
 
-# Configure OpenCensus to trace Django requests
-config_integration.trace_integrations(['django'])
+# Check if OpenCensus is available
+OPENCENSUS_AVAILABLE = True
+try:
+    from opencensus.ext.azure.log_exporter import AzureLogHandler
+    from opencensus.ext.azure.trace_exporter import AzureExporter
+    from opencensus.ext.django.middleware import OpencensusMiddleware
+    from opencensus.trace.samplers import ProbabilitySampler
+    from opencensus.trace import config_integration
+    
+    # Configure OpenCensus to trace Django requests
+    config_integration.trace_integrations(['django'])
+except ImportError:
+    OPENCENSUS_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -29,16 +35,21 @@ class AzureMonitorMiddleware:
         # Check if we're in a test environment
         self.testing = 'test' in sys.argv or os.environ.get('DJANGO_SETTINGS_MODULE') == 'agritrace_project.test_settings'
         
-        # Set up Azure Monitor if connection string is available and not in test mode
+        # Set up Azure Monitor if OpenCensus is available, connection string is available, and not in test mode
         self.app_insights_key = os.environ.get('APPLICATIONINSIGHTS_CONNECTION_STRING')
-        if self.app_insights_key and not self.testing:
-            # Add Azure Log Handler to the root logger
-            azure_handler = AzureLogHandler(connection_string=self.app_insights_key)
-            logging.getLogger('').addHandler(azure_handler)
-            
-            self.logger.info("Azure Monitor integration enabled")
+        if OPENCENSUS_AVAILABLE and self.app_insights_key and not self.testing:
+            try:
+                # Add Azure Log Handler to the root logger
+                azure_handler = AzureLogHandler(connection_string=self.app_insights_key)
+                logging.getLogger('').addHandler(azure_handler)
+                
+                self.logger.info("Azure Monitor integration enabled")
+            except Exception as e:
+                self.logger.warning(f"Failed to initialize Azure Monitor: {str(e)}")
         else:
-            if self.testing:
+            if not OPENCENSUS_AVAILABLE:
+                self.logger.warning("OpenCensus modules not available, Azure Monitor disabled")
+            elif self.testing:
                 self.logger.info("Test environment detected, Azure Monitor disabled")
             else:
                 self.logger.warning("Azure Monitor connection string not found, monitoring disabled")
