@@ -8,7 +8,7 @@ on:
 
 env:
   DOCKER_IMAGE: agritrace
-  AZURE_CONTAINER_REGISTRY: agritraceacr.azurecr.io
+  AZURE_CONTAINER_REGISTRY: agritracedevacr.azurecr.io
   RESOURCE_GROUP: agritrace-dev-rg
   CONTAINER_GROUP: agritrace-dev-frontend-ci
 
