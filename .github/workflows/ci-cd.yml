@@ -85,11 +85,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Azure CLI Login
-      uses: azure/CLI@v1
-      with:
-        inlineScript: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+    # No Azure login step needed - using ACR credentials directly with aci-deploy
         
     - name: Deploy to Azure Container Instances
       uses: azure/aci-deploy@v1
@@ -112,11 +108,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Azure CLI Login
-      uses: azure/CLI@v1
-      with:
-        inlineScript: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+    # No Azure login step needed - using ACR credentials directly with aci-deploy
         
     - name: Deploy to Azure Container Instances
       uses: azure/aci-deploy@v1
