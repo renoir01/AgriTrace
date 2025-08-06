@@ -34,7 +34,9 @@ jobs:
 
     - name: Run tests
       run: |
-        cd backend && python manage.py test
+        cd backend
+        mkdir -p logs
+        python manage.py test
         cd ../frontend && npm ci && npm test
 
     - name: Run security checks
