@@ -70,6 +70,12 @@ AgriTrace features a professional-grade, fully automated continuous deployment p
 - Comprehensive security reports generated as artifacts
 - Remediation documentation for identified vulnerabilities
 
+#### Security Documentation
+- **Security Report**: [Security Report](docs/security_report.md) - Detailed analysis of identified vulnerabilities and remediation plan
+- **CI/CD Integration**: Security scanning integrated into CI/CD pipeline with non-blocking reporting
+- **Vulnerability Management**: Documented approach for tracking and addressing security issues
+- **Risk Assessment**: Severity classification and prioritization of security vulnerabilities
+
 ### Monitoring & Observability
 - Azure Monitor dashboard with real-time metrics
 - Structured JSON logging for all application components
