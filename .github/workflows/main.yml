@@ -274,6 +274,8 @@ jobs:
             --os-type Linux \
             --ip-address public \
             --ports 8000 \
+            --cpu 1 \
+            --memory 1.5 \
             --environment-variables \
               DJANGO_SETTINGS_MODULE=agritrace_project.settings \
               DEBUG=False \
@@ -293,6 +295,8 @@ jobs:
             --os-type Linux \
             --ip-address public \
             --ports 80 \
+            --cpu 1 \
+            --memory 1.5 \
             --environment-variables \
               REACT_APP_API_URL=http://agritrace-staging-api.centralus.azurecontainer.io:8000/api \
               REACT_APP_ENV=staging \
@@ -392,6 +396,15 @@ jobs:
           echo "Backend ready: ${BACKEND_READY:-false}"
           echo "Backend live: ${BACKEND_LIVE:-false}"
           
+          # Capture container logs for debugging if health checks fail
+          if [[ "${BACKEND_HEALTH:-false}" != "true" || "${BACKEND_READY:-false}" != "true" || "${BACKEND_LIVE:-false}" != "true" ]]; then
+            echo "\n==== BACKEND CONTAINER LOGS ===="
+            az container logs --resource-group ${{ env.RESOURCE_GROUP }} --name agritrace-staging-backend --follow false
+            
+            echo "\n==== BACKEND CONTAINER DETAILS ===="
+            az container show --resource-group ${{ env.RESOURCE_GROUP }} --name agritrace-staging-backend
+          fi
+          
           # Continue workflow even if health checks fail
           # This allows the workflow to complete and deploy to production if needed
       
@@ -450,6 +463,8 @@ jobs:
             --os-type Linux \
             --ip-address public \
             --ports 8000 \
+            --cpu 1 \
+            --memory 1.5 \
             --environment-variables \
               DJANGO_SETTINGS_MODULE=agritrace_project.settings \
               DEBUG=False \
@@ -469,6 +484,8 @@ jobs:
             --os-type Linux \
             --ip-address public \
             --ports 80 \
+            --cpu 1 \
+            --memory 1.5 \
             --environment-variables \
               REACT_APP_API_URL=http://agritrace-prod-api.centralus.azurecontainer.io:8000/api \
               REACT_APP_ENV=production \
