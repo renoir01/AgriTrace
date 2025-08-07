@@ -1,0 +1,27 @@
+# Example Terraform Variables for AgriTrace Azure Deployment
+# Copy this file to terraform.tfvars and customize the values
+
+# Azure Configuration
+azure_location = "East US"
+environment = "dev"
+project_name = "agritrace"
+
+# Network Configuration
+vnet_cidr = "10.0.0.0/16"
+public_subnet_cidr = "10.0.1.0/24"
+private_subnet_cidr = "10.0.2.0/24"
+
+# Database Configuration
+db_sku_name = "B_Gen5_1"
+db_storage_mb = 20480
+db_name = "agritrace"
+db_username = "agritrace_admin"
+
+# Container Configuration
+container_cpu = 1
+container_memory = 2
+app_port = 8000
+
+# Optional: Custom Domain Configuration
+# domain_name = "your-domain.com"
+# ssl_certificate_path = "/path/to/certificate.pfx"

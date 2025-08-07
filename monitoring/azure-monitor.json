@@ -1,0 +1,87 @@
+{
+  "name": "AgriTrace Monitoring Dashboard",
+  "description": "Comprehensive monitoring dashboard for AgriTrace application",
+  "version": "1.0.0",
+  "widgets": [
+    {
+      "type": "metric",
+      "title": "Application Health Status",
+      "query": "requests | where url contains '/api/health/' | summarize count() by resultCode | render piechart",
+      "timeRange": "PT1H"
+    },
+    {
+      "type": "metric",
+      "title": "Response Time Trends",
+      "query": "requests | where url contains '/api/' | summarize avg(duration) by bin(timestamp, 5m) | render timechart",
+      "timeRange": "PT4H"
+    },
+    {
+      "type": "metric",
+      "title": "Error Rate",
+      "query": "requests | where resultCode >= 400 | summarize count() by bin(timestamp, 10m) | render timechart",
+      "timeRange": "PT2H"
+    },
+    {
+      "type": "log",
+      "title": "Recent Application Logs",
+      "query": "traces | where severityLevel >= 2 | project timestamp, message, severityLevel | order by timestamp desc | take 50",
+      "timeRange": "PT30M"
+    },
+    {
+      "type": "metric",
+      "title": "Container Resource Usage",
+      "query": "performanceCounters | where counterName == 'Memory Available Bytes' or counterName == 'Processor Time' | summarize avg(counterValue) by counterName, bin(timestamp, 5m) | render timechart",
+      "timeRange": "PT2H"
+    }
+  ],
+  "alerts": [
+    {
+      "name": "High Error Rate Alert",
+      "description": "Triggers when error rate exceeds 5% over 10 minutes",
+      "query": "requests | where resultCode >= 400 | summarize errorRate = count() * 100.0 / toint(countif(true)) by bin(timestamp, 10m) | where errorRate > 5",
+      "severity": "Critical",
+      "frequency": "PT5M",
+      "actions": [
+        {
+          "type": "email",
+          "recipients": ["admin@agritrace.com"]
+        },
+        {
+          "type": "webhook",
+          "url": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+        }
+      ]
+    },
+    {
+      "name": "Application Down Alert",
+      "description": "Triggers when health check fails",
+      "query": "requests | where url contains '/api/health/' and resultCode != 200 | summarize count() by bin(timestamp, 5m) | where count_ > 0",
+      "severity": "Critical",
+      "frequency": "PT2M",
+      "actions": [
+        {
+          "type": "email",
+          "recipients": ["admin@agritrace.com"]
+        }
+      ]
+    },
+    {
+      "name": "High Response Time Alert",
+      "description": "Triggers when average response time exceeds 2 seconds",
+      "query": "requests | where url contains '/api/' | summarize avgDuration = avg(duration) by bin(timestamp, 10m) | where avgDuration > 2000",
+      "severity": "Warning",
+      "frequency": "PT10M",
+      "actions": [
+        {
+          "type": "email",
+          "recipients": ["admin@agritrace.com"]
+        }
+      ]
+    }
+  ],
+  "configuration": {
+    "refreshInterval": "PT1M",
+    "autoRefresh": true,
+    "theme": "dark"
+  }
+}
