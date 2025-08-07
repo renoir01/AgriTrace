@@ -306,10 +306,22 @@ jobs:
       - name: Health check
         run: |
           echo "Performing health checks..."
-          curl -f http://agritrace-staging.eastus.azurecontainer.io/health || echo "Frontend health check failed"
-          curl -f http://agritrace-staging-api.eastus.azurecontainer.io:8000/api/health/ || echo "Backend health check failed"
-          curl -f http://agritrace-staging-api.eastus.azurecontainer.io:8000/api/ready/ || echo "Backend readiness check failed"
-          curl -f http://agritrace-staging-api.eastus.azurecontainer.io:8000/api/live/ || echo "Backend liveness check failed"
+          # Try standard Azure region format
+          curl -f http://agritrace-staging.eastus.azurecontainer.io/health || \
+          curl -f http://agritrace-staging.eastus2.azurecontainer.io/health || \
+          curl -f http://agritrace-staging.azurecontainer.io/health || echo "Frontend health check failed"
+          
+          curl -f http://agritrace-staging-api.eastus.azurecontainer.io:8000/api/health/ || \
+          curl -f http://agritrace-staging-api.eastus2.azurecontainer.io:8000/api/health/ || \
+          curl -f http://agritrace-staging-api.azurecontainer.io:8000/api/health/ || echo "Backend health check failed"
+          
+          curl -f http://agritrace-staging-api.eastus.azurecontainer.io:8000/api/ready/ || \
+          curl -f http://agritrace-staging-api.eastus2.azurecontainer.io:8000/api/ready/ || \
+          curl -f http://agritrace-staging-api.azurecontainer.io:8000/api/ready/ || echo "Backend readiness check failed"
+          
+          curl -f http://agritrace-staging-api.eastus.azurecontainer.io:8000/api/live/ || \
+          curl -f http://agritrace-staging-api.eastus2.azurecontainer.io:8000/api/live/ || \
+          curl -f http://agritrace-staging-api.azurecontainer.io:8000/api/live/ || echo "Backend liveness check failed"
       
       - name: Update monitoring dashboard
         run: |
