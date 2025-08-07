@@ -270,14 +270,14 @@ jobs:
             --registry-username ${{ secrets.ACR_USERNAME }} \
             --registry-password ${{ secrets.ACR_PASSWORD }} \
             --dns-name-label agritrace-staging-api \
-            --location eastus \
+            --location centralus \
             --os-type Linux \
             --ip-address public \
             --ports 8000 \
             --environment-variables \
               DJANGO_SETTINGS_MODULE=agritrace_project.settings \
               DEBUG=False \
-              ALLOWED_HOSTS=agritrace-staging-api.eastus.azurecontainer.io,agritrace-staging.eastus.azurecontainer.io,localhost,127.0.0.1,* \
+              ALLOWED_HOSTS=agritrace-staging-api.centralus.azurecontainer.io,agritrace-staging.centralus.azurecontainer.io,localhost,127.0.0.1,* \
               LOG_LEVEL=INFO \
             --restart-policy Always || true
           
@@ -289,12 +289,12 @@ jobs:
             --registry-username ${{ secrets.ACR_USERNAME }} \
             --registry-password ${{ secrets.ACR_PASSWORD }} \
             --dns-name-label agritrace-staging \
-            --location eastus \
+            --location centralus \
             --os-type Linux \
             --ip-address public \
             --ports 80 \
             --environment-variables \
-              REACT_APP_API_URL=http://agritrace-staging-api.eastus.azurecontainer.io:8000/api \
+              REACT_APP_API_URL=http://agritrace-staging-api.centralus.azurecontainer.io:8000/api \
               REACT_APP_ENV=staging \
             --restart-policy Always || true
       
@@ -306,22 +306,11 @@ jobs:
       - name: Health check
         run: |
           echo "Performing health checks..."
-          # Try standard Azure region format
-          curl -f http://agritrace-staging.eastus.azurecontainer.io/health || \
-          curl -f http://agritrace-staging.eastus2.azurecontainer.io/health || \
-          curl -f http://agritrace-staging.azurecontainer.io/health || echo "Frontend health check failed"
-          
-          curl -f http://agritrace-staging-api.eastus.azurecontainer.io:8000/api/health/ || \
-          curl -f http://agritrace-staging-api.eastus2.azurecontainer.io:8000/api/health/ || \
-          curl -f http://agritrace-staging-api.azurecontainer.io:8000/api/health/ || echo "Backend health check failed"
-          
-          curl -f http://agritrace-staging-api.eastus.azurecontainer.io:8000/api/ready/ || \
-          curl -f http://agritrace-staging-api.eastus2.azurecontainer.io:8000/api/ready/ || \
-          curl -f http://agritrace-staging-api.azurecontainer.io:8000/api/ready/ || echo "Backend readiness check failed"
-          
-          curl -f http://agritrace-staging-api.eastus.azurecontainer.io:8000/api/live/ || \
-          curl -f http://agritrace-staging-api.eastus2.azurecontainer.io:8000/api/live/ || \
-          curl -f http://agritrace-staging-api.azurecontainer.io:8000/api/live/ || echo "Backend liveness check failed"
+          # Use correct centralus region for health checks
+          curl -f http://agritrace-staging.centralus.azurecontainer.io/health || echo "Frontend health check failed"
+          curl -f http://agritrace-staging-api.centralus.azurecontainer.io:8000/api/health/ || echo "Backend health check failed"
+          curl -f http://agritrace-staging-api.centralus.azurecontainer.io:8000/api/ready/ || echo "Backend readiness check failed"
+          curl -f http://agritrace-staging-api.centralus.azurecontainer.io:8000/api/live/ || echo "Backend liveness check failed"
       
       - name: Update monitoring dashboard
         run: |
